@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+    <head>
+        <title>
+            {{title}}
+        </title>
+        <style>
+            .error {
+                color: red
+            }
+        </style>
+    </head>
+<body>
+
+    <nav>
+        <a href='log-in'>Log in</a>
+        <a href='register'>Register</a>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% for category,message in messages %}
+            <p class="{{category}}">{{message}}</p>
+        {% endfor %}
+    {% endwith %}
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>
