@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from run-app import db, app
+from app import db, app
 
 
 class User(UserMixin, db.Model):
@@ -34,4 +34,4 @@ __tablename__ = 'users'
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return '<Employee: {}>'.format(self.username)
+        return '<ID: {} {} {}>'.format(self.id, self.first_name, self.last_name)

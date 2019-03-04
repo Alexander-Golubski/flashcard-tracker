@@ -1,16 +1,18 @@
-from flask import Flask, request, redirect, render_template, session, flash
+# Third party imports
+from flask import Flask, redirect, render_template, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
-from run-app import flask_app, db, app
-
-from flask import flash, redirect, render_template, url_for
 from flask_login import login_required, login_user, logout_user
+# Local application imports
+from forms import LoginForm, RegistrationForm
+from models.user import User
 
-from profile-auth import LoginForm, RegistrationForm
-from run-app import db
-from models import User
+app = Flask(__name__)
 
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('app/templates/dashboard.html')
 
-@auth.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -21,14 +23,14 @@ def register():
 
         db.session.add(user)
         db.session.commit()
-        flash('You have successfully registered! You may now login.')
+        flash('Welcome to Flashcard Tracker! You may now login.')
 
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('app.login'))
 
     return render_template('templates/register.html', form=form, title='Register')
 
 
-@auth.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -43,13 +45,13 @@ def login():
         else:
             flash('Invalid email or password.')
 
-    return render_template('templates/log-in.html', form=form, title='Login')
+    return render_template('templates/login.html', form=form, title='Login')
 
 
-@auth.route('/logout')
+@app.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('You have successfully been logged out.')
 
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('profile-auth.login'))
