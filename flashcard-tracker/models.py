@@ -1,18 +1,16 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, app
+from . import db #login_manager
 
 
 class User(UserMixin, db.Model):
 
-__tablename__ = 'users'
+    __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
-    email = db.Column(db.String(40, unique=True)
+    email = db.Column(db.String(40), unique=True)
     password_hash = db.Column(db.String(120))
     #cards = db.relationship("Card", backref="owner") 
     

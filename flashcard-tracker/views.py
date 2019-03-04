@@ -3,31 +3,31 @@ from flask import Flask, redirect, render_template, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, login_user, logout_user
 # Local application imports
-from forms import LoginForm, RegistrationForm
-from models.user import User
-
-app = Flask(__name__)
-
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('app/templates/dashboard.html')
+from . import app
+from .forms import LoginForm, RegistrationForm
+from .models import User
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    Route handler for registration
+    Add user to the database
+    """
     form = RegistrationForm()
     if form.validate_on_submit():
+        # create user
         user = User(email=form.email.data,
-                            first_name=form.first_name.data,
-                            last_name=form.last_name.data,
-                            password=form.password.data)
-
+                    first_name=form.first_name.data,
+                    last_name=form.last_name.data,
+                    password=form.password.data)
+        # add user to the database
         db.session.add(user)
         db.session.commit()
         flash('Welcome to Flashcard Tracker! You may now login.')
 
-        return redirect(url_for('app.login'))
+        return redirect(url_for('/login'))
 
-    return render_template('templates/register.html', form=form, title='Register')
+    return render_template('register.html', form=form, title='Register')
 
 
 @app.route('/login', methods=['GET', 'POST'])
