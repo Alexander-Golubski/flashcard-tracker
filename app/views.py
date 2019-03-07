@@ -16,9 +16,9 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         # create user
-        user = User(email=form.email.data,
-                    first_name=form.first_name.data,
+        user = User(first_name=form.first_name.data,
                     last_name=form.last_name.data,
+                    email=form.email.data,
                     password=form.password.data)
         # add user to the database
         db.session.add(user)
@@ -36,8 +36,7 @@ def login():
     if form.validate_on_submit():
 
         user = User.query.filter_by(email=form.email.data).first()
-        if user is not None and user.verify_password(
-                form.password.data):
+        if user is not None and user.verify_password(form.password.data):
             login_user(user)
 
             return redirect(url_for('home.dashboard'))
@@ -45,7 +44,7 @@ def login():
         else:
             flash('Invalid email or password.')
 
-    return render_template('templates/login.html', form=form, title='Login')
+    return render_template('login.html', form=form, title='Login')
 
 
 @app.route('/logout')

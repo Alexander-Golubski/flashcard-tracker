@@ -5,7 +5,18 @@
     <h1>Register</h1>
     <p class="error">{{error}}</p>
 
-<form action="/signup" method="post">
+<form method="POST" action="/login">
+    <div>{{ form.first_name.label }}: {{ form.first_name() }}</div>
+    <div>{{ form.last_name.label }}: {{ form.last_name() }}</div>
+    <div>{{ form.email.label }}: {{ form.email() }}</div>
+    <div>{{ form.password.label }}: {{ form.password() }}</div>
+    <div>{{ form.confirm_password.label }}: {{ form.confirm_password() }}</div>
+    <input type="submit" value="Register">
+</form>
+
+<!---
+
+<form method="post">
     <table>
         <tr>
             <td>
@@ -49,6 +60,7 @@
         </tr>
     </table>
     <br/>
-    <input type="submit" value="Sign up">
+    <input type="submit" value="Register">
 </form>
+-->
 {% endblock %}
