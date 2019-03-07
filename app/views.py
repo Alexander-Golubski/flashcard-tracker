@@ -3,7 +3,7 @@ from flask import Flask, redirect, render_template, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, login_user, logout_user
 # Local application imports
-from . import app
+from . import app, db
 from .forms import LoginForm, RegistrationForm
 from .models import User
 
@@ -19,7 +19,7 @@ def register():
         user = User(first_name=form.first_name.data,
                     last_name=form.last_name.data,
                     email=form.email.data,
-                    password=form.password.data)
+                    password_hash=form.password.data)
         # add user to the database
         db.session.add(user)
         db.session.commit()
@@ -44,7 +44,7 @@ def login():
         else:
             flash('Invalid email or password.')
 
-    return render_template('login.html', form=form, title='Login')
+    return render_template('login.html', form=form, title='Dashboard')
 
 
 @app.route('/logout')
@@ -53,4 +53,4 @@ def logout():
     logout_user()
     flash('You have successfully been logged out.')
 
-    return redirect(url_for('profile-auth.login'))
+    return redirect(url_for('login.html'))

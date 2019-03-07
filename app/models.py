@@ -1,6 +1,8 @@
+# Third party imports
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from . import db #login_manager
+# Local application imports
+from . import db, login_manager
 
 
 class User(UserMixin, db.Model):
@@ -14,11 +16,11 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(120))
     #cards = db.relationship("Card", backref="owner") 
     
-    def __init__(self, first_name, last_name, email, password):
+    def __init__(self, first_name, last_name, email, password_hash):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.password = password_hash
+        self.password_hash = password_hash
 
     @property
     def password(self):
@@ -33,3 +35,7 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<ID: {} {} {}>'.format(self.id, self.first_name, self.last_name)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
