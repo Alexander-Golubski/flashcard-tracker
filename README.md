@@ -1,4 +1,4 @@
-# Project Outline
+# Teach_SR Outline
 
 ### Overview
 
@@ -6,7 +6,7 @@
 
 I personally found the spaced repetition software program Anki to be extremely useful in learning mandarin vocabulary. Programs like Anki are commonly used by other language learners and medical students, and have been for decades. However, in all of my years of language classes, I never had a teacher who used spaced repetition software in the classroom. I believe this is because existing programs do not have any way for teachers to see if students are actually completing their flashcard reviews.
 
-For my Liftoff capstone, I will create a web app that will allow teachers to assign digital flashcards to their students. The web app will use a spaced repetition algorithm to determine when students will be asked to review a given card. Teachers will be able to see if students are keeping up with their reviews.
+To meet this need, Teach_SR will allow teachers to assign digital flashcards to their students. The web app will use a spaced repetition algorithm to determine when students will be asked to review a given card. Teachers will be able to see if students are keeping up with their reviews.
 
 
 ### Features
@@ -27,11 +27,15 @@ For my Liftoff capstone, I will create a web app that will allow teachers to ass
 * Flask
 * MySQL
 * SQLAlchemy
+* Flask-login
+* WTForms
 * Jinja2 templates
 * Pivotal Tracker
 
 ### What I'll Have to Learn
 
 I'll need to determine which spaced repetition algorithm to use. Anki uses [SuperMemo-2](https://www.supermemo.com/english/ol/sm2.htm), but there are [some issues with it](http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2).
+
+I'll need to learn two new modules: Flask-login and WTForms.
 
 I'd like to make sure that the web app looks nice and is functional on desktops as well as mobile devices in case teachers want to have their students complete their reviews in class (on, for example, school-provided iPads). I'm not sure if I can do that with the technologies I've listed so far.
