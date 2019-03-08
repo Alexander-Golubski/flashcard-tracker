@@ -8,6 +8,7 @@ setup(
         'flask',
         'flask_login',
         'flask_sqlalchemy',
+        'boostrap'
         'wtforms'
     ],
 )

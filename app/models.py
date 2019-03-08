@@ -7,8 +7,6 @@ from . import db, login_manager
 
 class User(UserMixin, db.Model):
 
-    __tablename__ = 'users'
-
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
