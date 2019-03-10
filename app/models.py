@@ -11,7 +11,7 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
     email = db.Column(db.String(40), unique=True)
-    password_hash = db.Column(db.String(120))
+    password_hash = db.Column(db.String(128))
     #cards = db.relationship("Card", backref="owner") 
     
     def __init__(self, first_name, last_name, email, password_hash):

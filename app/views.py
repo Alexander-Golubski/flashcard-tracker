@@ -25,26 +25,31 @@ def register():
         db.session.commit()
         flash('Welcome to Flashcard Tracker! You may now login.')
 
-        return redirect(url_for('/login'))
+        return redirect(url_for('login'))
 
     return render_template('register.html', form=form, title='Register')
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Route handler for logging in
+    Validates user login information
+    """
     form = LoginForm()
     if form.validate_on_submit():
 
         user = User.query.filter_by(email=form.email.data).first()
-        if user is not None and user.verify_password(form.password.data):
+        #if user is not None and user.verify_password(form.password.data):
+        if user is not None and user.password_hash == form.password.data:
             login_user(user)
 
-            return redirect(url_for('home.dashboard'))
+            return redirect(url_for('dashboard'))
 
         else:
             flash('Invalid email or password.')
 
-    return render_template('login.html', form=form, title='Dashboard')
+    return render_template('login.html', form=form, title='login')
 
 
 @app.route('/logout')
@@ -54,3 +59,8 @@ def logout():
     flash('You have successfully been logged out.')
 
     return redirect(url_for('login.html'))
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
