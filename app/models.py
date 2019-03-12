@@ -36,6 +36,10 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
+    """
+    This callback is used to reload the user object from the user ID stored
+    in the session.
+    """
     return User.query.get(int(user_id))
 
 class Deck(db.Model):

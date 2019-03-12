@@ -1,7 +1,7 @@
 # Third party imports
 from flask import Flask, redirect, render_template, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 # Local application imports
 from . import app, db
 from .forms import LoginForm, RegistrationForm
@@ -63,4 +63,7 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+
+    decks = Deck.query.filter_by(owner_id=current_user).all()
+
     return render_template('dashboard.html')

@@ -9,7 +9,11 @@
 
 <h2>My Decks</h2>
 <hr>
-
+    {% for deck in decks %}
+    <p><a href='/deck?id={{deck.id}}'>{{deck.name}}</a></p>
+    {% endfor %}
+<br>
+    <p><a href='/create-deck'>Create New Deck</a></p>
 <br>
 
 <h2>Monitoring</h2>
