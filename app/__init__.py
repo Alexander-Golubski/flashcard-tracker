@@ -1,7 +1,10 @@
+# Third party imports
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
+# Local application imports
+from .key import key
 
 app = Flask(__name__)
 
@@ -10,7 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://teach_sr:flashcard@loca
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.secret_key = 'c3c61aba99efb<1ce484af{=k.'
+app.secret_key = key
 
 db = SQLAlchemy()
 db.init_app(app)
