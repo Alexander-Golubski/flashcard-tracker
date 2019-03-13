@@ -32,7 +32,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return '<ID: {}, {} {}>'.format(self.id, self.first_name, self.last_name)
+        return '<ID: {}, {}, {}>'.format(self.id, self.last_name, self.first_name)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -45,7 +45,7 @@ def load_user(user_id):
 class Deck(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30))
+    name = db.Column(db.String(30), unique=True)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     cards = db.relationship('Card', backref='deck')
 

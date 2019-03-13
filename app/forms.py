@@ -22,3 +22,7 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Log in')
+
+class CreateDeckForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(max=35)])
+    submit = SubmitField('Create')

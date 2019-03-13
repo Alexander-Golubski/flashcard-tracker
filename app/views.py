@@ -1,11 +1,11 @@
 # Third party imports
-from flask import Flask, redirect, render_template, session, flash, url_for
+from flask import Flask, redirect, render_template, session, flash, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, login_user, logout_user, current_user
 # Local application imports
 from . import app, db
-from .forms import LoginForm, RegistrationForm
-from .models import User
+from .forms import LoginForm, RegistrationForm, CreateDeckForm
+from .models import User, Deck
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -69,6 +69,25 @@ def dashboard():
     Review Flashcards, Decks, and Monitoring
     """
 
-    decks = Deck.query.filter_by(owner_id=current_user).all()
+    decks = Deck.query.filter_by(owner_id=current_user.id).all()
 
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', decks=decks)
+
+@app.route('/create-deck', methods=['GET', 'POST'])
+@login_required
+def create_deck():
+    """
+    Creates decks and assigns them to current user_id (inner join)
+    """
+    form = CreateDeckForm()
+    if form.validate_on_submit():
+        # create deck
+        deck = Deck(name=form.name.data, owner=current_user)
+        # add deck to the database
+        db.session.add(deck)
+        db.session.commit()
+        flash('Deck successfully created')
+
+        return redirect(url_for('dashboard'))
+
+    return render_template('create-deck.html', form=form, title='create deck')
