@@ -24,6 +24,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+Thumbs.db
 
 # Security
 app/key.py
