@@ -3,11 +3,11 @@
 {% block content %}
 <h1>My Dashboard</h1>
 
-<h2>Review Flashcards</h2>
+<h3>Review Flashcards</h3>
 <hr>
 <br>
 
-<h2>My Decks</h2>
+<h3>My Decks</h3>
 <hr>
     {% for deck in decks %}
     <p><a href='/deck?id={{deck.id}}'>{{deck.name}}</a></p>
@@ -16,7 +16,7 @@
     <p><a href='/create-deck'>Create New Deck</a></p>
 <br>
 
-<h2>Monitoring</h2>
+<h3>Monitoring</h3>
 <hr>
 <br>
 {% endblock %}
