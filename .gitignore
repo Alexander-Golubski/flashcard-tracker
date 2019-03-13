@@ -24,7 +24,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
-teach_SR/Thumbs.db
+*.db
 .vscode/
 
 # Security
