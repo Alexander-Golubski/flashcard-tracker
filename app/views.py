@@ -63,6 +63,11 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    """
+    Displays the dashboard view
+    From the dashboard, user can access:
+    Review Flashcards, Decks, and Monitoring
+    """
 
     decks = Deck.query.filter_by(owner_id=current_user).all()
 
