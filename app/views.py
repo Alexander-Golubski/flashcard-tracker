@@ -1,3 +1,7 @@
+"""
+Contains all views, including:
+/register, /login, /logout, /dashboard, /create-deck, /deck, /add-card
+"""
 # Third party imports
 from flask import Flask, redirect, render_template, session, flash, url_for, request
 from flask_sqlalchemy import SQLAlchemy
@@ -6,6 +10,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from . import app, db
 from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm
 from .models import User, Deck, Card, load_user
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -40,7 +45,7 @@ def login():
     if form.validate_on_submit():
 
         user = User.query.filter_by(email=form.email.data).first()
-        #if user is not None and user.verify_password(form.password.data):
+        # if user is not None and user.verify_password(form.password.data):
         if user is not None and user.password_hash == form.password.data:
             login_user(user)
 
@@ -60,6 +65,7 @@ def logout():
 
     return redirect(url_for('login.html'))
 
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -72,6 +78,7 @@ def dashboard():
     decks = Deck.query.filter_by(owner_id=current_user.id).all()
 
     return render_template('dashboard.html', decks=decks)
+
 
 @app.route('/create-deck', methods=['GET', 'POST'])
 @login_required
@@ -92,11 +99,12 @@ def create_deck():
 
     return render_template('create-deck.html', form=form, title='create deck')
 
+
 @app.route('/deck')
 @login_required
 def deck():
     """
-    Displays view of deck. 
+    Displays view of deck
     From here, users can:
     Add, edit, assign, and delete cards from decks and access settings
     """
@@ -105,6 +113,7 @@ def deck():
     deck = Deck.query.filter_by(id=deck_id).first()
 
     return render_template('deck.html', deck=deck)
+
 
 @app.route('/add-card', methods=['GET', 'POST'])
 @login_required

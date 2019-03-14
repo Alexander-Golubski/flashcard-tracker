@@ -1,16 +1,22 @@
-#Third party imports
+# Third party imports
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField, ValidationError, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
-#Local application imports
+# Local application imports
 from .models import User
 
+
 class RegistrationForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=35)])
-    first_name = StringField('First Name', validators=[DataRequired(), Length(max=45)])
-    last_name = StringField('Last Name', validators=[DataRequired(), Length(max=45)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=45),
-                                                    EqualTo('confirm_password')])
+    email = StringField('Email', validators=[DataRequired(),
+                                             Email(),
+                                             Length(max=35)])
+    first_name = StringField('First Name', validators=[DataRequired(),
+                                                       Length(max=45)])
+    last_name = StringField('Last Name', validators=[DataRequired(),
+                                                     Length(max=45)])
+    password = PasswordField('Password', validators=[DataRequired(),
+                                                     Length(min=8, max=45),
+                                                     EqualTo('confirm_password')])
     confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('Register')
 
@@ -18,16 +24,20 @@ class RegistrationForm(FlaskForm):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email is already in use.')
 
+
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Log in')
 
+
 class CreateDeckForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=35)])
     submit = SubmitField('Create')
 
+
 class AddCardForm(FlaskForm):
-    front = TextAreaField('Front', validators=[DataRequired(), Length(max=1200)])
+    front = TextAreaField('Front', validators=[DataRequired(),
+                                               Length(max=1200)])
     back = TextAreaField('Back', validators=[DataRequired(), Length(max=1200)])
     submit = SubmitField('Add card')

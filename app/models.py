@@ -1,3 +1,17 @@
+"""
+Contains all database models.
+
+One to many relationships:
+Deck to Card (one deck can have many cards)
+User(owner) to Card (each card, class, and deck has one user who owns it)
+User(owner) to Class
+User(owner) to Deck
+
+Many to many relationships:
+User to Class (one user can have many classes, and vice versa)
+Class to Card
+"""
+
 # Third party imports
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
