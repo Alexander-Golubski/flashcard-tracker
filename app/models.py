@@ -8,7 +8,7 @@ User(owner) to Class
 User(owner) to Deck
 
 Many to many relationships:
-User to Class (one user can have many classes, and vice versa)
+User to Class (one user can join many classes, one class can have many users)
 Class to Card
 """
 
@@ -52,7 +52,7 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(30))
     email = db.Column(db.String(40), unique=True)
     password_hash = db.Column(db.String(128))
-    # A user can own multiple decks, cards, and classes
+    # A user can own multiple decks, cards, and classes (one to m any)
     decks = db.relationship('Deck', backref='owner')
     cards = db.relationship('Card', backref='owner')
     classes = db.relationship('Class', backref='owner')
@@ -86,12 +86,12 @@ class User(UserMixin, db.Model):
 
 
 class Deck(db.Model):
-
+    """ Creates Deck table """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True)
     # Every deck is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # A deck can have multiple cards
+    # A deck can have multiple cards (one to many)
     cards = db.relationship('Card', backref='deck')
 
     def __init__(self, name, owner):
@@ -103,13 +103,14 @@ class Deck(db.Model):
         return cards
 
     def __repr__(self):
+        owner_name = self.owner.first_name + " " + self.owner.last_name
         return '<ID: {}, Name: {}, Owner: {}>'.format(self.id,
                                                       self.name,
-                                                      self.owner)
+                                                      owner_name)
 
 
 class Card(db.Model):
-
+    """ Creates Card table """
     id = db.Column(db.Integer, primary_key=True)
     front = db.Column(db.String(1200))
     back = db.Column(db.String(1200))
@@ -118,20 +119,23 @@ class Card(db.Model):
     # Every card is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, front, back, deck):
+    def __init__(self, front, back, deck, owner):
         self.front = front
         self.back = back
         self.deck = deck
+        self.owner = owner
 
     def __repr__(self):
+        owner_name = self.owner.first_name + " " + self.owner.last_name
         return '<ID: {}, Front: {}, Back: {}, Deck: {}>'.format(self.id,
                                                                 self.front,
                                                                 self.back,
-                                                                self.deck)
+                                                                self.deck
+                                                                owner_name)
 
 
 class Class(db.Model):
-
+    """ Creates Class table """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True)
     password_hash = db.Column(db.String(128))
@@ -142,3 +146,14 @@ class Class(db.Model):
                                    secondary=CardClasses,
                                    backref=db.backref('cards'))
                                    # class.cards will display cards
+
+    def __init__(self, name, password_hash, owner):
+        self.name = name
+        self.password_hash = password_hash
+        self.owner = owner
+
+    def __repr__(self):
+        owner_name = self.owner.first_name + " " + self.owner.last_name
+        return '<ID: {}, Name: {}, Owner: {}>'.format(self.id,
+                                                      self.name,
+                                                      owner_name)
