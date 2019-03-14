@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}My Decks{% endblock %}
+
+{% block content %}
+    <a href="add-card?id={{deck.id}}.html">Add new card to deck</a>
+    <a href="settings?id={{deck.id}}.html">Settings</a>
+    <br>
+    <h3>{{deck.name}}</h3>
+    <hr>
+
+    <!-- list of cards here -->    
+
+{% endblock %}
+
+<!-- TODO: connect checkboxes to selected card's id
+    <a href="edit-card?id={{card.id}}.html">Edit card</a>
+    <a href="delete-card?id={{card.id}}.html">Delete card(s)</a>  -->
