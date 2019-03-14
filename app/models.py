@@ -46,16 +46,21 @@ CardClasses = db.Table('CardClasses,'
 
 
 class User(UserMixin, db.Model):
-
+    """ Creates User table """
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
     email = db.Column(db.String(40), unique=True)
     password_hash = db.Column(db.String(128))
+    # A user can own multiple decks, cards, and classes
     decks = db.relationship('Deck', backref='owner')
-    classes = db.relationship('Class',
-                              secondary=UserClasses,
-                              backref=db.backref('classes'))
+    cards = db.relationship('Card', backref='owner')
+    classes = db.relationship('Class', backref='owner')
+    # Many to many: classes to users
+    user_classes = db.relationship('Class',
+                                   secondary=UserClasses,
+                                   backref=db.backref('classes'))
+                                   # user.classes will display classes
 
     def __init__(self, first_name, last_name, email, password_hash):
         self.first_name = first_name
@@ -84,7 +89,9 @@ class Deck(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True)
+    # Every deck is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # A deck can have multiple cards
     cards = db.relationship('Card', backref='deck')
 
     def __init__(self, name, owner):
@@ -106,7 +113,10 @@ class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     front = db.Column(db.String(1200))
     back = db.Column(db.String(1200))
+    # Every card belongs to one deck
     deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'))
+    # Every card is owned by one user
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __init__(self, front, back, deck):
         self.front = front
@@ -125,6 +135,10 @@ class Class(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True)
     password_hash = db.Column(db.String(128))
-    students = db.Column()  # list of students?
-    cards = db.Column()  # list of cards?
+    # Every class is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # Many to many: classes to cards
+    card_classes = db.relationship('Card',
+                                   secondary=CardClasses,
+                                   backref=db.backref('cards'))
+                                   # class.cards will display cards
