@@ -121,10 +121,10 @@ def add_card():
                     back=form.front.data,
                     deck=deck)
         # add card to the database
-        db.session.add(deck)
+        db.session.add(card)
         db.session.commit()
         flash('Card successfully created')
 
-        return redirect('/deck?id={}'.format(deck_id)
+        return redirect('/deck?id={}'.format(deck_id))
 
     return render_template('add-card.html', form=form)
