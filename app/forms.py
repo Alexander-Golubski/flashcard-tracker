@@ -47,3 +47,4 @@ class AddCardForm(FlaskForm):
 class CreateClassForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=35)])
     password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Create')
