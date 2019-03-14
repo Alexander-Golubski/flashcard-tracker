@@ -4,6 +4,32 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # Local application imports
 from . import db, login_manager
 
+# flask_login
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """
+    This callback is used to reload the user object from the user ID stored
+    in the session. It is required by flask_login.
+    """
+    return User.query.get(int(user_id))
+
+# Association tables
+
+
+UserClasses = db.Table('UserClasses',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('class_id', db.Integer, db.ForeignKey('class.id'))
+)
+
+CardClasses = db.Table('CardClasses,'
+    db.Column('card_id', db.Integer, db.ForeignKey('card.id')),
+    db.Column('class_id', db.Integer, db.ForeignKey('class.id'))
+)
+
+# Class models
+
 
 class User(UserMixin, db.Model):
 
@@ -12,8 +38,11 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(30))
     email = db.Column(db.String(40), unique=True)
     password_hash = db.Column(db.String(128))
-    decks = db.relationship('Deck', backref='owner') 
-    
+    decks = db.relationship('Deck', backref='owner')
+    classes = db.relationship('Class',
+                              secondary=UserClasses,
+                              backref=db.backref('classes'))
+
     def __init__(self, first_name, last_name, email, password_hash):
         self.first_name = first_name
         self.last_name = last_name
@@ -32,15 +61,10 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return '<ID: {}, {}, {}>'.format(self.id, self.last_name, self.first_name)
+        return '<ID: {}, {}, {}>'.format(self.id,
+                                         self.last_name,
+                                         self.first_name)
 
-@login_manager.user_loader
-def load_user(user_id):
-    """
-    This callback is used to reload the user object from the user ID stored
-    in the session.
-    """
-    return User.query.get(int(user_id))
 
 class Deck(db.Model):
 
@@ -52,9 +76,16 @@ class Deck(db.Model):
     def __init__(self, name, owner):
         self.name = name
         self.owner = owner
-    
+
+    def list_cards(self, an_owner_id):
+        cards = Card.query.filter_by(owner_id=an_owner_id).all()
+        return cards
+
     def __repr__(self):
-        return '<ID: {}, Name: {}, Owner: {}>'.format(self.id, self.name, self.owner)
+        return '<ID: {}, Name: {}, Owner: {}>'.format(self.id,
+                                                      self.name,
+                                                      self.owner)
+
 
 class Card(db.Model):
 
@@ -67,7 +98,19 @@ class Card(db.Model):
         self.front = front
         self.back = back
         self.deck = deck
-    
+
     def __repr__(self):
-        return '<ID: {}, Front: {}, Back: {}, Deck: {}>'.format(self.id, 
-                                         self.front, self.back, self.deck)
+        return '<ID: {}, Front: {}, Back: {}, Deck: {}>'.format(self.id,
+                                                                self.front,
+                                                                self.back,
+                                                                self.deck)
+
+
+class Class(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), unique=True)
+    password_hash = db.Column(db.String(128))
+    students = db.Column()  # list of students?
+    cards = db.Column()  # list of cards?
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
