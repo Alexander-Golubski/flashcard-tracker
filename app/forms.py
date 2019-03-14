@@ -1,3 +1,4 @@
+"""Contains all flask forms"""
 # Third party imports
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField, ValidationError, TextAreaField
@@ -41,3 +42,8 @@ class AddCardForm(FlaskForm):
                                                Length(max=1200)])
     back = TextAreaField('Back', validators=[DataRequired(), Length(max=1200)])
     submit = SubmitField('Add card')
+
+
+class CreateClassForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(max=35)])
+    password = PasswordField('Password', validators=[DataRequired()])
