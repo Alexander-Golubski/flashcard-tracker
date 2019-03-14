@@ -4,8 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, login_user, logout_user, current_user
 # Local application imports
 from . import app, db
-from .forms import LoginForm, RegistrationForm, CreateDeckForm
-from .models import User, Deck
+from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm
+from .models import User, Deck, Card, load_user
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -91,3 +91,40 @@ def create_deck():
         return redirect(url_for('dashboard'))
 
     return render_template('create-deck.html', form=form, title='create deck')
+
+@app.route('/deck')
+@login_required
+def deck():
+    """
+    Displays view of deck. 
+    From here, users can:
+    Add, edit, assign, and delete cards from decks and access settings
+    """
+
+    deck_id = request.args.get('id')
+    deck = Deck.query.filter_by(id=deck_id).first()
+
+    return render_template('deck.html', deck=deck)
+
+@app.route('/add-card', methods=['GET', 'POST'])
+@login_required
+def add_card():
+    """
+    Allows user to add a card to the current deck
+    """
+    form = AddCardForm()
+    deck_id = request.args.get('id')
+    deck = Deck.query.filter_by(id=deck_id).first()
+    if form.validate_on_submit():
+        # create card
+        card = Card(front=form.front.data, 
+                    back=form.front.data,
+                    deck=deck)
+        # add card to the database
+        db.session.add(deck)
+        db.session.commit()
+        flash('Card successfully created')
+
+        return redirect('/deck?id={}'.format(deck_id)
+
+    return render_template('add-card.html', form=form)

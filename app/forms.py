@@ -1,6 +1,6 @@
 #Third party imports
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, SubmitField, ValidationError
+from wtforms import PasswordField, StringField, SubmitField, ValidationError, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 #Local application imports
 from .models import User
@@ -26,3 +26,8 @@ class LoginForm(FlaskForm):
 class CreateDeckForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=35)])
     submit = SubmitField('Create')
+
+class AddCardForm(FlaskForm):
+    front = TextAreaField('Front', validators=[DataRequired(), Length(max=1200)])
+    back = TextAreaField('Back', validators=[DataRequired(), Length(max=1200)])
+    submit = SubmitField('Add card')
