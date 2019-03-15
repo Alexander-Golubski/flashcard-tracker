@@ -5,6 +5,10 @@
 
 <h3>Review Flashcards</h3>
 <hr>
+<p><a href='/create-class'>Create New Class</a></p>
+{% for class in user.classes %}
+<p><a href='/class?id={{class.id}}'>{{class.name}}</a></p>
+{% endfor %}
 <br>
 
 <h3>My Decks</h3>

@@ -74,10 +74,10 @@ def dashboard():
     From the dashboard, user can access:
     Review Flashcards, Decks, and Monitoring
     """
-
+    user = current_user
     decks = Deck.query.filter_by(owner_id=current_user.id).all()
 
-    return render_template('dashboard.html', decks=decks)
+    return render_template('dashboard.html', decks=decks, user=user)
 
 
 @app.route('/create-deck', methods=['GET', 'POST'])
