@@ -8,8 +8,25 @@
     <h3>{{deck.name}}</h3>
     <hr>
 
-    <!-- list of cards here -->    
-
+    <!-- list of cards here -->
+    <table>
+        <tr>
+            <th>Front</th>
+            <th>Back</th>
+            <th>Classes</th>
+        </tr>
+        {% for card in cards %}
+        <tr>
+            <th>{{card.front}}</th>
+            <th>{{card.back}}</th>
+            <th>
+            {% for class in card.classes %}
+            {{class.name + ", "}}
+            {% endfor %}
+            </th>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
 
 <!-- TODO: connect checkboxes to selected card's id

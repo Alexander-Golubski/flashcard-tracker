@@ -37,7 +37,7 @@ UserClasses = db.Table('UserClasses',
     db.Column('class_id', db.Integer, db.ForeignKey('class.id'))
 )
 
-CardClasses = db.Table('CardClasses,'
+CardClasses = db.Table('CardClasses',
     db.Column('card_id', db.Integer, db.ForeignKey('card.id')),
     db.Column('class_id', db.Integer, db.ForeignKey('class.id'))
 )
@@ -52,7 +52,7 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(30))
     email = db.Column(db.String(40), unique=True)
     password_hash = db.Column(db.String(128))
-    # A user can own multiple decks, cards, and classes (one to m any)
+    # A user can own multiple decks, cards, and classes (one to many)
     decks = db.relationship('Deck', backref='owner')
     cards = db.relationship('Card', backref='owner')
     classes = db.relationship('Class', backref='owner')
@@ -60,7 +60,6 @@ class User(UserMixin, db.Model):
     user_classes = db.relationship('Class',
                                    secondary=UserClasses,
                                    backref=db.backref('classes'))
-                                   # user.classes will display classes
 
     def __init__(self, first_name, last_name, email, password_hash):
         self.first_name = first_name
@@ -130,7 +129,7 @@ class Card(db.Model):
         return '<ID: {}, Front: {}, Back: {}, Deck: {}>'.format(self.id,
                                                                 self.front,
                                                                 self.back,
-                                                                self.deck
+                                                                self.deck,
                                                                 owner_name)
 
 
@@ -144,8 +143,7 @@ class Class(db.Model):
     # Many to many: classes to cards
     card_classes = db.relationship('Card',
                                    secondary=CardClasses,
-                                   backref=db.backref('cards'))
-                                   # class.cards will display cards
+                                   backref=db.backref('classes'))
 
     def __init__(self, name, password_hash, owner):
         self.name = name

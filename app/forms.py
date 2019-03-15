@@ -28,12 +28,14 @@ class RegistrationForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(),
+                                                     Length(min=8, max=45)])
     submit = SubmitField('Log in')
 
 
 class CreateDeckForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired(), Length(max=35)])
+    name = StringField('Name', validators=[DataRequired(), Length(max=35),
+                                                           Length(min=8, max=45)])
     submit = SubmitField('Create')
 
 
@@ -46,5 +48,6 @@ class AddCardForm(FlaskForm):
 
 class CreateClassForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=35)])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(),
+                                                     Length(min=8, max=45)])
     submit = SubmitField('Create')

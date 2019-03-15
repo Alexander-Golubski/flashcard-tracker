@@ -8,8 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, login_user, logout_user, current_user
 # Local application imports
 from . import app, db
-from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm
-from .models import User, Deck, Card, load_user
+from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, CreateClassForm
+from .models import User, Deck, Card, Class, load_user
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -109,10 +109,13 @@ def deck():
     Add, edit, assign, and delete cards from decks and access settings
     """
 
+    # Get currently selected deck
     deck_id = request.args.get('id')
     deck = Deck.query.filter_by(id=deck_id).first()
+    # Display list of cards in deck
+    cards = deck.cards
 
-    return render_template('deck.html', deck=deck)
+    return render_template('deck.html', deck=deck, cards=cards)
 
 
 @app.route('/add-card', methods=['GET', 'POST'])
@@ -126,9 +129,10 @@ def add_card():
     deck = Deck.query.filter_by(id=deck_id).first()
     if form.validate_on_submit():
         # create card
-        card = Card(front=form.front.data, 
+        card = Card(front=form.front.data,
                     back=form.front.data,
-                    deck=deck)
+                    deck=deck,
+                    owner=current_user)
         # add card to the database
         db.session.add(card)
         db.session.commit()
@@ -137,3 +141,25 @@ def add_card():
         return redirect('/deck?id={}'.format(deck_id))
 
     return render_template('add-card.html', form=form)
+
+
+@app.route('/create-class', methods=['GET', 'POST'])
+@login_required
+def create_class():
+    """
+    Allows user to create a class
+    """
+    form = CreateClassForm()
+    if form.validate_on_submit():
+        # create class
+        cohort = Class(name=form.name.data,
+                       password_hash=form.password.data,
+                       owner=current_user)
+        # add class to the database
+        db.session.add(cohort)
+        db.session.commit()
+        flash('Class successfully created')
+
+        return redirect(url_for('dashboard'))
+
+    return render_template('create-class.html', form=form)
