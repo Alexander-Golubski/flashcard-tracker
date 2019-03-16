@@ -1,4 +1,5 @@
 """Contains all flask forms"""
+
 # Third party imports
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField, ValidationError, TextAreaField

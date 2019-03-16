@@ -1,3 +1,8 @@
+"""
+Initializes app
+Contains settings
+"""
+
 # Third party imports
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy

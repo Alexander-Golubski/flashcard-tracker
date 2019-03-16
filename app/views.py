@@ -2,6 +2,7 @@
 Contains all views, including:
 /register, /login, /logout, /dashboard, /create-deck, /deck, /add-card
 """
+
 # Third party imports
 from flask import Flask, redirect, render_template, session, flash, url_for, request
 from flask_sqlalchemy import SQLAlchemy
@@ -112,7 +113,7 @@ def deck():
     # Get currently selected deck
     deck_id = request.args.get('id')
     deck = Deck.query.filter_by(id=deck_id).first()
-    # Display list of cards in deck
+    # Display list of cards in deck with backref
     cards = deck.cards
 
     return render_template('deck.html', deck=deck, cards=cards)
