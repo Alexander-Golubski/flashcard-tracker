@@ -34,6 +34,8 @@ To meet this need, Teach_SR will allow teachers to assign digital flashcards to 
 
 ### What I'll Have to Learn
 
-I'll need to determine which spaced repetition algorithm to use. Anki uses [SuperMemo-2](https://www.supermemo.com/english/ol/sm2.htm), but there are [some issues with it](http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2).
+* I'll need to determine which spaced repetition algorithm to use. Anki uses [SuperMemo-2](https://www.supermemo.com/english/ol/sm2.htm), but there are [some issues with it](http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2).
 
-I'll need to learn two new modules: Flask-login and WTForms.
+* I'll need to learn two new modules: Flask-login and WTForms.
+
+* I'll need to learn how to model many-to-many relationships in SQLAlchemy.
