@@ -29,26 +29,25 @@ class RegistrationForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(),
-                                                     Length(min=8, max=45)])
+    password = PasswordField('Password',
+                             validators=[DataRequired(), Length(min=8, max=45)])
     submit = SubmitField('Log in')
 
 
 class CreateDeckForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired(), Length(max=35),
-                                                           Length(min=8, max=45)])
+    name = StringField('Name', validators=[DataRequired(), Length(min=5, max=45)])
     submit = SubmitField('Create')
 
 
 class AddCardForm(FlaskForm):
-    front = TextAreaField('Front', validators=[DataRequired(),
-                                               Length(max=1200)])
+    front = TextAreaField('Front',
+                          validators=[DataRequired(), Length(max=1200)])
     back = TextAreaField('Back', validators=[DataRequired(), Length(max=1200)])
     submit = SubmitField('Add card')
 
 
 class CreateClassForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=35)])
-    password = PasswordField('Password', validators=[DataRequired(),
-                                                     Length(min=8, max=45)])
+    password = PasswordField('Password',
+                             validators=[DataRequired(), Length(min=5, max=45)])
     submit = SubmitField('Create')
