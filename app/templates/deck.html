@@ -7,28 +7,37 @@
     <br>
     <h3>{{deck.name}}</h3>
     <hr>
-
-    <!-- list of cards here -->
-    <table>
-        <tr>
-            <th>Front</th>
-            <th>Back</th>
-            <th>Classes</th>
-        </tr>
-        {% for card in cards %}
-        <tr>
-            <th>{{card.front}}</th>
-            <th>{{card.back}}</th>
-            <th>
-            {% for class in card.classes %}
-            {{class.name + ", "}}
+    <form>
+        <table>
+            <tr>
+                <th>Front</th>
+                <th>Back</th>
+                <th>Classes</th>
+                <th>Edit</th>
+                <th>Select</th>
+            </tr>
+            {% for card in cards %}
+            <tr>
+                <th>{{card.front}}</th>
+                <th>{{card.back}}</th>
+                <th>
+                {% for class in card.classes %}
+                {{class.name + ","}}
+                {% endfor %}
+                </th>
+                <th><a href="edit-card?id={{card.id}}.html">Edit card</a></th>
+                <th><input type="checkbox" name="sel_cards" value="{{card}}"></th>
+            </tr>
             {% endfor %}
-            </th>
-        </tr>
-        {% endfor %}
-    </table>
+        </table>
+        <select>
+            {% for class in classes %}
+            <option name="{{sel_class}}" value="{{class}}">{{class.name}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Add to class">
+    </form>
 {% endblock %}
 
 <!-- TODO: connect checkboxes to selected card's id
-    <a href="edit-card?id={{card.id}}.html">Edit card</a>
     <a href="delete-card?id={{card.id}}.html">Delete card(s)</a>  -->

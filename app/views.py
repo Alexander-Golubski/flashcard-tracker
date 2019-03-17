@@ -101,7 +101,7 @@ def create_deck():
     return render_template('create-deck.html', form=form, title='create deck')
 
 
-@app.route('/deck')
+@app.route('/deck', methods=['GET', 'POST'])
 @login_required
 def deck():
     """
@@ -113,17 +113,31 @@ def deck():
     # Get currently selected deck
     deck_id = request.args.get('id')
     deck = Deck.query.filter_by(id=deck_id).first()
-    # Display list of cards in deck with backref
+    # Display list of cards in deck using model's backref attribute
     cards = deck.cards
+    # Get list of the user's owned classes for dropdown menu
+    classes = current_user.classes
 
-    return render_template('deck.html', deck=deck, cards=cards)
+    if request.method == 'POST':
+        # Get checkbox'd cards
+        sel_cards = request.form.getlist('sel_cards')
+        # Get selected class
+        sel_class = request.form.get('sel_class')
+        # Add cards to selected class
+        for card in sel_cards:
+            card.classes.append(sel_class)
+            db.session.commit()
+            flash('Cards successfully added')
+        return redirect(url_for('dashboard'))
+
+    return render_template('deck.html', deck=deck, cards=cards, classes=classes)
 
 
 @app.route('/add-card', methods=['GET', 'POST'])
 @login_required
 def add_card():
     """
-    Allows user to add a card to the current deck
+    Allows user to add a new card to the current deck
     """
     form = AddCardForm()
     deck_id = request.args.get('id')
@@ -131,7 +145,7 @@ def add_card():
     if form.validate_on_submit():
         # create card
         card = Card(front=form.front.data,
-                    back=form.front.data,
+                    back=form.back.data,
                     deck=deck,
                     owner=current_user)
         # add card to the database
