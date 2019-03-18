@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Class{% endblock %}
+
+{% block content %}
+
+<h1>{{sel_class.name}}</h1>
+<hr>
+
+<table>
+    <tr>
+        {% for student in students %}
+        <th>{{student.first_name}}</th>
+        <th>{{student.last_name}}</th>
+        {% endfor %}
+    </tr>
+</table>
+
+{% endblock %}
