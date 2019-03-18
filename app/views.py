@@ -203,22 +203,41 @@ def class_view(class_id):
     cards = sel_class.cards
     students = sel_class.students
 
-    # TODO: Add functionality to remove UserCards from students
-    # Route to remove cards from class
+    # TODO: allow these only for class owner
     if request.method == 'POST':
-        # Get checkbox'd cards
-        sel_card_ids = request.form.getlist('sel_cards')
-        # Create list of card objects
-        sel_cards = []
-        for card_id in sel_card_ids:
-            sel_cards.append(Card.query.get(card_id))
-        # Remove cards contained in list
-        for card in sel_cards:
-            card.classes.remove(sel_class)
-        db.session.commit()
-        flash('Card(s) successfully removed.')
 
-        return redirect('/class/{}'.format(class_id))
+        # Route to remove students from class
+        if request.form['submit'] == 'Remove students from class':
+            # Get checkbox'd students
+            sel_stu_ids = request.form.getlist('sel_students')
+            # Create list of user objects
+            sel_students = []
+            for stu_id in sel_stu_ids:
+                sel_students.append(User.query.get(stu_id))
+            # Remove students from class
+            for student in sel_students:
+                student.joined_classes.remove(sel_class)
+            db.session.commit()
+            flash('Student(s) successfully removed')
+
+            return redirect('/class/{}'.format(class_id))
+
+        # TODO: Add functionality to remove UserCards from students
+        # Route to remove cards from class
+        if request.form['submit'] == 'Remove cards from class':
+            # Get checkbox'd cards
+            sel_card_ids = request.form.getlist('sel_cards')
+            # Create list of card objects
+            sel_cards = []
+            for card_id in sel_card_ids:
+                sel_cards.append(Card.query.get(card_id))
+            # Remove cards contained in list
+            for card in sel_cards:
+                card.classes.remove(sel_class)
+            db.session.commit()
+            flash('Card(s) successfully removed.')
+
+            return redirect('/class/{}'.format(class_id))
 
     return render_template('class.html', sel_class=sel_class,
                            students=students, cards=cards)
@@ -275,7 +294,7 @@ def join_class_inst(instructor_id):
                            classes=classes, instructor=instructor)
 
 
-@app.route('/join-class/<int:class_id>', methods=['GET', 'POST'])
+@app.route('/join-class-pw/<int:class_id>', methods=['GET', 'POST'])
 @login_required
 def join_class_pw(class_id):
     """

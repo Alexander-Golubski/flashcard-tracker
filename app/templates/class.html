@@ -8,20 +8,23 @@
 
     <h3>Students</h3>
     <hr>
-
-        <table border="1">
-            <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-            </tr>
-            {% for student in students %}
+        <form method="POST">
+            <table border="1">
                 <tr>
-                    <th>{{student.first_name}}</th>
-                    <th>{{student.last_name}}</th>
-
+                    <th>First Name</th>
+                    <th>Last Name</th>
                 </tr>
-            {% endfor %}
-        </table>
+                {% for student in students %}
+                    <tr>
+                        <th>{{student.first_name}}</th>
+                        <th>{{student.last_name}}</th>
+                        <th><input type="checkbox" name="sel_students" value="{{student.id}}"></th>
+                    </tr>
+                {% endfor %}
+            </table>
+            <br>
+            <input type="submit" name="submit" value="Remove students from class">
+        </form>
 
     <h3>Cards</h3>
     <hr>
@@ -40,7 +43,7 @@
                 {% endfor %}
             </table>
             <br>
-            <input type="submit" value="Remove cards from class">
+            <input type="submit" name="submit" value="Remove cards from class">
         </form>
 
 {% endblock %}
