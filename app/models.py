@@ -149,7 +149,7 @@ class Class(db.Model):
                                    secondary=CardClasses,
                                    backref=db.backref('classes'))
     # Many to many: classes to users
-    user_classes = db.relationship('Class',
+    user_classes = db.relationship('User',
                                    secondary=UserClasses,
                                    backref=db.backref('joined_classes'))
 
