@@ -5,8 +5,9 @@
 
 <h3>Review Flashcards</h3>
 <hr>
-<p><a href='/create-class'>Create New Class</a></p>
-{% for class in user.classes %}
+<p><a href='/create-class'>Create new class</a></p>
+<p><a href='/join-class'>Join class</a></p>
+{% for class in classes %}
 <p><a href='/class/{{class.id}}'>{{class.name}}</a></p>
 {% endfor %}
 <br>
@@ -17,7 +18,7 @@
     <p><a href='/deck/{{deck.id}}'>{{deck.name}}</a></p>
     {% endfor %}
 <br>
-    <p><a href='/create-deck'>Create New Deck</a></p>
+    <p><a href='/create-deck'>Create new deck</a></p>
 <br>
 
 <h3>Monitoring</h3>

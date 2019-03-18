@@ -8,7 +8,7 @@ from flask import Flask, redirect, render_template, session, flash, url_for, req
 from flask_login import login_required, login_user, logout_user, current_user
 # Local application imports
 from . import app, db
-from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, CreateClassForm
+from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, CreateClassForm, JoinClassForm, JoinClassPWForm
 from .models import User, Deck, Card, Class, load_user
 
 
@@ -76,8 +76,9 @@ def dashboard():
     """
     user = current_user
     decks = Deck.query.filter_by(owner_id=current_user.id).all()
+    classes = user.classes
 
-    return render_template('dashboard.html', decks=decks, user=user)
+    return render_template('dashboard.html', decks=decks, user=user, classes=classes)
 
 
 @app.route('/create-deck', methods=['GET', 'POST'])
@@ -143,6 +144,7 @@ def deck_dashboard():
 
     return redirect('/dashboard')
 
+
 @app.route('/class/<int:class_id>', methods=['GET', 'POST'])
 @login_required
 def class_view(class_id):
@@ -155,6 +157,13 @@ def class_view(class_id):
     students = sel_class.students
 
     return render_template('class.html', sel_class=sel_class, students=students)
+
+
+@app.route('/class/dashboard')
+@login_required
+def class_dashboard():
+
+    return redirect('/dashboard')
 
 
 @app.route('/deck/add-card', methods=['GET', 'POST'])
@@ -202,3 +211,55 @@ def create_class():
         return redirect(url_for('dashboard'))
 
     return render_template('create-class.html', form=form)
+
+
+@app.route('/join-class', methods=['GET', 'POST'])
+@login_required
+def join_class():
+    """
+    Allows user to join a class, including their own
+    """
+    form = JoinClassForm()
+    if form.validate_on_submit():
+        # Get instructor based on submitted email
+        instructor = User.query.filter_by(email=form.email.data).first()
+
+        return redirect('join-class/{}'.format(instructor.id))
+
+    return render_template('join-class.html', form=form)
+
+
+@app.route('/join-class/<int:instructor_id>')
+@login_required
+def join_class_inst(instructor_id):
+    """
+    Shows user a list of the instructor's classes
+    """
+    instructor = User.query.filter_by(id=instructor_id).first()
+    classes = instructor.classes
+
+    return render_template('instructor-classes.html',
+                           classes=classes, instructor=instructor)
+
+
+@app.route('/join/<int:class_id>', methods=['GET', 'POST'])
+@login_required
+def join_class_pw(class_id):
+    """
+    Prompts user to enter password before joining the class
+    """
+    form = JoinClassPWForm()
+    if form.validate_on_submit():
+        sel_class = Class.query.filter_by(id=class_id).first()
+        if sel_class.password_hash == form.password.data:
+            sel_class.students.append(current_user)
+            db.session.commit()
+            flash('You have joined the class!')
+
+            return redirect('/dashboard')
+        else:
+            flash('Invalid password')
+
+            return render_template('join-class-pw.html', form=form)
+    
+    return render_template('join-class-pw.html', form=form)

@@ -51,3 +51,16 @@ class CreateClassForm(FlaskForm):
     password = PasswordField('Password',
                              validators=[DataRequired(), Length(min=5, max=45)])
     submit = SubmitField('Create')
+
+
+class JoinClassForm(FlaskForm):
+    email = StringField('Instructor email', validators=[DataRequired(),
+                                                       Email(),
+                                                       Length(max=35)])
+    submit = SubmitField('Submit')
+
+
+class JoinClassPWForm(FlaskForm):
+    password = PasswordField('Password',
+                             validators=[DataRequired(), Length(min=5, max=45)])
+    submit = SubmitField('Submit')
