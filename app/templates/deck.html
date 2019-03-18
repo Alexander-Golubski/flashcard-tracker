@@ -2,13 +2,14 @@
 {% block title %}My Decks{% endblock %}
 
 {% block content %}
-    <a href="add-card?id={{deck.id}}.html">Add new card to deck</a> | 
-    <a href="settings?id={{deck.id}}.html">Settings</a>
+    <a href="add-card/{{deck.id}}">Add new card to deck</a> | 
+    <a href="settings/{{deck.id}}">Settings</a>
     <br>
     <h3>{{deck.name}}</h3>
     <hr>
+    <br>
     <form method="post">
-        <table>
+        <table border="1">
             <tr>
                 <th>Front</th>
                 <th>Back</th>
@@ -22,7 +23,7 @@
                 <th>{{card.back}}</th>
                 <th>
                 {% for class in card.classes %}
-                {{class.name + "/"}}
+                {{class.name + " "}}
                 {% endfor %}
                 </th>
                 <th><a href="edit-card?id={{card.id}}.html">Edit card</a></th>
@@ -30,12 +31,16 @@
             </tr>
             {% endfor %}
         </table>
+        <br>
         <select name="sel_class_id">
             {% for class in classes %}
             <option value="{{class.id}}">{{class.name}}</option>
             {% endfor %}
         </select>
-        <input type="submit" value="Add to class">
+        <input type="submit" name="submit" value="Add to class">
+        <hr>
+        <br>
+        <input type="submit" name="submit" value="Delete cards">
     </form>
 {% endblock %}
 
