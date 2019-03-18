@@ -14,11 +14,12 @@
 
     <nav>
         {% if current_user %}
-        <p>{{current_user.first_name}}</p><a href='dashboard'>Dashboard</a>
+        {{current_user.first_name}} | <a href='dashboard'>Dashboard</a>
         {% else %}
         <a href='login'>Log in | </a>
         <a href='register'>Register</a>
         {% endif %}
+        <hr>
     </nav>
 
     {% with messages = get_flashed_messages(with_categories=True) %}

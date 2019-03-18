@@ -14,7 +14,7 @@
 <h3>My Decks</h3>
 <hr>
     {% for deck in decks %}
-    <p><a href='/deck?id={{deck.id}}'>{{deck.name}}</a></p>
+    <p><a href='/deck/{{deck.id}}'>{{deck.name}}</a></p>
     {% endfor %}
 <br>
     <p><a href='/create-deck'>Create New Deck</a></p>

@@ -101,9 +101,9 @@ def create_deck():
     return render_template('create-deck.html', form=form, title='create deck')
 
 
-@app.route('/deck', methods=['GET', 'POST'])
+@app.route('/deck/<int:deck_id>', methods=['GET', 'POST'])
 @login_required
-def deck():
+def deck(deck_id):
     """
     Displays view of deck
     From here, users can:
@@ -111,24 +111,29 @@ def deck():
     """
 
     # Get currently selected deck
-    deck_id = request.args.get('id')
-    deck = Deck.query.filter_by(id=deck_id).first()
+    deck = Deck.query.get_or_404(deck_id)
     # Display list of cards in deck using model's backref attribute
     cards = deck.cards
     # Get list of the user's owned classes for dropdown menu
     classes = current_user.classes
 
+    # Assign cards to class
     if request.method == 'POST':
         # Get checkbox'd cards
-        sel_cards = request.form.getlist('sel_cards')
+        sel_card_ids = request.form.getlist('sel_cards')
+        sel_cards = []
+        for card_id in sel_card_ids:
+            sel_cards.append(Card.query.get(card_id))
         # Get selected class
-        sel_class = request.form.get('sel_class')
+        sel_class_id = request.form.get('sel_class_id')
+        sel_class = Class.query.get(sel_class_id)
         # Add cards to selected class
         for card in sel_cards:
             card.classes.append(sel_class)
-            db.session.commit()
-            flash('Cards successfully added')
-        return redirect(url_for('dashboard'))
+        db.session.commit()
+        flash('Cards successfully added')
+
+        return redirect('/dashboard')
 
     return render_template('deck.html', deck=deck, cards=cards, classes=classes)
 
