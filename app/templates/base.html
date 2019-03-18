@@ -13,11 +13,10 @@
 <body>
 
     <nav>
-        {% if current_user %}
-        {{current_user.first_name}} | <a href='dashboard'>Dashboard</a>
+        {% if current_user.is_authenticated %}
+        {{current_user.first_name}} | <a href='dashboard'>Dashboard</a> | <a href='logout'>Log out</a>
         {% else %}
-        <a href='login'>Log in | </a>
-        <a href='register'>Register</a>
+        <a href='login'>Log in</a> | <a href='register'>Register</a>
         {% endif %}
         <hr>
     </nav>
