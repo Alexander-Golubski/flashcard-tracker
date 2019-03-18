@@ -3,16 +3,44 @@
 
 {% block content %}
 
-<h1>{{sel_class.name}}</h1>
-<hr>
+    <h1>{{sel_class.name}}</h1>
+    <hr>
 
-<table>
-    <tr>
-        {% for student in students %}
-        <th>{{student.first_name}}</th>
-        <th>{{student.last_name}}</th>
-        {% endfor %}
-    </tr>
-</table>
+    <h3>Students</h3>
+    <hr>
+
+        <table border="1">
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+            </tr>
+            {% for student in students %}
+                <tr>
+                    <th>{{student.first_name}}</th>
+                    <th>{{student.last_name}}</th>
+
+                </tr>
+            {% endfor %}
+        </table>
+
+    <h3>Cards</h3>
+    <hr>
+        <form method="POST">
+            <table border="1">
+                <tr>
+                    <th>Front</th>
+                    <th>Back</th>
+                </tr>
+                {% for card in cards %}
+                    <tr>
+                        <th>{{card.front}}</th>
+                        <th>{{card.back}}</th>
+                        <th><input type="checkbox" name="sel_cards" value="{{card.id}}"></th>
+                    </tr>
+                {% endfor %}
+            </table>
+            <br>
+            <input type="submit" value="Remove cards from class">
+        </form>
 
 {% endblock %}
