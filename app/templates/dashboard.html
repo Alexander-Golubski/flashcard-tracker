@@ -7,7 +7,7 @@
 <hr>
 <p><a href='/create-class'>Create New Class</a></p>
 {% for class in user.classes %}
-<p><a href='/class?id={{class.id}}'>{{class.name}}</a></p>
+<p><a href='/class/{{class.id}}'>{{class.name}}</a></p>
 {% endfor %}
 <br>
 

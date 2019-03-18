@@ -59,7 +59,7 @@ class User(UserMixin, db.Model):
     # Many to many: classes to users
     user_classes = db.relationship('Class',
                                    secondary=UserClasses,
-                                   backref=db.backref('classes'))
+                                   backref=db.backref('students'))
 
     def __init__(self, first_name, last_name, email, password_hash):
         self.first_name = first_name

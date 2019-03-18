@@ -5,7 +5,6 @@ Contains all views, including:
 
 # Third party imports
 from flask import Flask, redirect, render_template, session, flash, url_for, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, login_user, logout_user, current_user
 # Local application imports
 from . import app, db
@@ -103,7 +102,7 @@ def create_deck():
 
 @app.route('/deck/<int:deck_id>', methods=['GET', 'POST'])
 @login_required
-def deck(deck_id):
+def deck_view(deck_id):
     """
     Displays view of deck
     From here, users can:
@@ -131,14 +130,34 @@ def deck(deck_id):
         for card in sel_cards:
             card.classes.append(sel_class)
         db.session.commit()
-        flash('Cards successfully added')
+        flash('Card(s) successfully added')
 
-        return redirect('/dashboard')
+        return redirect('/deck/{}'.format(deck_id))
 
     return render_template('deck.html', deck=deck, cards=cards, classes=classes)
 
 
-@app.route('/add-card', methods=['GET', 'POST'])
+@app.route('/deck/dashboard')
+@login_required
+def deck_dashboard():
+
+    return redirect('/dashboard')
+
+@app.route('/class/<int:class_id>', methods=['GET', 'POST'])
+@login_required
+def class_view(class_id):
+    """
+    Displays view of class
+    """
+
+    sel_class = Class.query.get_or_404(class_id)
+    #cards = sel_class.cards
+    students = sel_class.students
+
+    return render_template('class.html', sel_class=sel_class, students=students)
+
+
+@app.route('/deck/add-card', methods=['GET', 'POST'])
 @login_required
 def add_card():
     """
