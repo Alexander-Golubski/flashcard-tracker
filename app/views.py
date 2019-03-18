@@ -12,6 +12,9 @@ from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, Cre
 from .models import User, Deck, Card, Class, load_user
 
 
+# Authentication route controllers
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """
@@ -63,7 +66,10 @@ def logout():
     logout_user()
     flash('You have successfully been logged out.')
 
-    return redirect(url_for('login.html'))
+    return redirect(url_for('login'))
+
+
+# Dashboard route controller
 
 
 @app.route('/dashboard')
@@ -81,6 +87,9 @@ def dashboard():
     return render_template('dashboard.html', decks=decks, user=user, classes=classes)
 
 
+# Deck route controllers
+
+
 @app.route('/create-deck', methods=['GET', 'POST'])
 @login_required
 def create_deck():
@@ -96,7 +105,7 @@ def create_deck():
         db.session.commit()
         flash('Deck successfully created')
 
-        return redirect(url_for('dashboard'))
+        return redirect('/deck/{}'.format(deck.id))
 
     return render_template('create-deck.html', form=form, title='create deck')
 
@@ -117,10 +126,11 @@ def deck_view(deck_id):
     # Get list of the user's owned classes for dropdown menu
     classes = current_user.classes
 
-    # Assign cards to class
-    if request.method == 'POST':
+    # Route to assign cards to class
+    if request.method == 'POST' and request.form['submit'] == 'Add to class':
         # Get checkbox'd cards
         sel_card_ids = request.form.getlist('sel_cards')
+        # Create list of card objects
         sel_cards = []
         for card_id in sel_card_ids:
             sel_cards.append(Card.query.get(card_id))
@@ -135,45 +145,33 @@ def deck_view(deck_id):
 
         return redirect('/deck/{}'.format(deck_id))
 
-    return render_template('deck.html', deck=deck, cards=cards, classes=classes)
+    # Route to delete cards
+    if request.method == 'POST' and request.form['submit'] == 'Delete cards':
+        # Get checkbox'd cards
+        sel_card_ids = request.form.getlist('sel_cards')
+        # Create list of card objects
+        sel_cards = []
+        for card_id in sel_card_ids:
+            sel_cards.append(Card.query.get(card_id))
+        # Delete cards from deck
+        for card in sel_cards:
+            deck.cards.remove(card)
+        db.session.commit()
+        flash('Card(s) successfully deleted')
+
+        return redirect('/deck/{}'.format(deck_id))
+
+    return render_template('deck.html', deck=deck, cards=cards, 
+                           classes=classes)
 
 
-@app.route('/deck/dashboard')
+@app.route('/deck/add-card/<int:deck_id>', methods=['GET', 'POST'])
 @login_required
-def deck_dashboard():
-
-    return redirect('/dashboard')
-
-
-@app.route('/class/<int:class_id>', methods=['GET', 'POST'])
-@login_required
-def class_view(class_id):
-    """
-    Displays view of class
-    """
-
-    sel_class = Class.query.get_or_404(class_id)
-    #cards = sel_class.cards
-    students = sel_class.students
-
-    return render_template('class.html', sel_class=sel_class, students=students)
-
-
-@app.route('/class/dashboard')
-@login_required
-def class_dashboard():
-
-    return redirect('/dashboard')
-
-
-@app.route('/deck/add-card', methods=['GET', 'POST'])
-@login_required
-def add_card():
+def add_card(deck_id):
     """
     Allows user to add a new card to the current deck
     """
     form = AddCardForm()
-    deck_id = request.args.get('id')
     deck = Deck.query.filter_by(id=deck_id).first()
     if form.validate_on_submit():
         # create card
@@ -186,9 +184,44 @@ def add_card():
         db.session.commit()
         flash('Card successfully created')
 
-        return redirect('/deck?id={}'.format(deck_id))
+        return redirect('/deck/{}'.format(deck_id))
 
     return render_template('add-card.html', form=form)
+
+
+# Class route controllers
+
+
+@app.route('/class/<int:class_id>', methods=['GET', 'POST'])
+@login_required
+def class_view(class_id):
+    """
+    Displays view of class
+    """
+
+    sel_class = Class.query.get_or_404(class_id)
+    cards = sel_class.cards
+    students = sel_class.students
+
+    # TODO: Add functionality to remove UserCards from students
+    # Route to remove cards from class
+    if request.method == 'POST':
+        # Get checkbox'd cards
+        sel_card_ids = request.form.getlist('sel_cards')
+        # Create list of card objects
+        sel_cards = []
+        for card_id in sel_card_ids:
+            sel_cards.append(Card.query.get(card_id))
+        # Remove cards contained in list
+        for card in sel_cards:
+            card.classes.remove(sel_class)
+        db.session.commit()
+        flash('Card(s) successfully removed.')
+
+        return redirect('/class/{}'.format(class_id))
+
+    return render_template('class.html', sel_class=sel_class,
+                           students=students, cards=cards)
 
 
 @app.route('/create-class', methods=['GET', 'POST'])
@@ -233,7 +266,7 @@ def join_class():
 @login_required
 def join_class_inst(instructor_id):
     """
-    Shows user a list of the instructor's classes
+    Shows user a list of classes owned by instructor
     """
     instructor = User.query.filter_by(id=instructor_id).first()
     classes = instructor.classes
@@ -242,7 +275,7 @@ def join_class_inst(instructor_id):
                            classes=classes, instructor=instructor)
 
 
-@app.route('/join/<int:class_id>', methods=['GET', 'POST'])
+@app.route('/join-class/<int:class_id>', methods=['GET', 'POST'])
 @login_required
 def join_class_pw(class_id):
     """
@@ -250,8 +283,10 @@ def join_class_pw(class_id):
     """
     form = JoinClassPWForm()
     if form.validate_on_submit():
+        # Get selected class based on id from URL
         sel_class = Class.query.filter_by(id=class_id).first()
         if sel_class.password_hash == form.password.data:
+            # Add user to the class through the backref "students"
             sel_class.students.append(current_user)
             db.session.commit()
             flash('You have joined the class!')
@@ -261,5 +296,36 @@ def join_class_pw(class_id):
             flash('Invalid password')
 
             return render_template('join-class-pw.html', form=form)
-    
+
     return render_template('join-class-pw.html', form=form)
+
+
+# Redirects
+
+
+@app.route('/deck/dashboard')
+@login_required
+def deck_dashboard():
+
+    return redirect('/dashboard')
+
+
+@app.route('/class/dashboard')
+@login_required
+def class_dashboard():
+
+    return redirect('/dashboard')
+
+
+@app.route('/join-class/dashboard')
+@login_required
+def join_class_dashboard():
+
+    return redirect('/dashboard')
+
+
+@app.route('/deck/add-card/dashboard')
+@login_required
+def add_card_dashboard():
+
+    return redirect('/dashboard')
