@@ -56,7 +56,7 @@ class User(UserMixin, db.Model):
     decks = db.relationship('Deck', backref='owner')
     cards = db.relationship('Card', backref='owner')
     classes = db.relationship('Class', backref='owner')
-    # Many to many: classes to users
+    # Many to many: users to classes
     user_classes = db.relationship('Class',
                                    secondary=UserClasses,
                                    backref=db.backref('students'))
@@ -117,6 +117,10 @@ class Card(db.Model):
     deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'))
     # Every card is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # Many to many: cards to classes
+    card_classes = db.relationship('Class',
+                                   secondary=CardClasses,
+                                   backref=db.backref('cards'))
 
     def __init__(self, front, back, deck, owner):
         self.front = front
@@ -144,6 +148,10 @@ class Class(db.Model):
     card_classes = db.relationship('Card',
                                    secondary=CardClasses,
                                    backref=db.backref('classes'))
+    # Many to many: classes to users
+    user_classes = db.relationship('Class',
+                                   secondary=UserClasses,
+                                   backref=db.backref('joined_classes'))
 
     def __init__(self, name, password_hash, owner):
         self.name = name
@@ -155,3 +163,11 @@ class Class(db.Model):
         return '<ID: {}, Name: {}, Owner: {}>'.format(self.id,
                                                       self.name,
                                                       owner_name)
+
+
+# class UserCard(db.Model, Card):
+#     """
+#     Extends the Card class. Is basically a copy of the card it is based on.
+#     The difference is that it is tied to a user. It will contain data on
+#     review times.
+#     """
