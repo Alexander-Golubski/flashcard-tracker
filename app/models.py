@@ -2,14 +2,15 @@
 Contains all database models.
 
 One to many relationships:
-Deck to Card (one deck can have many cards)
-User(owner) to Card (each card, class, and deck has one user who owns it)
-User(owner) to Class
+Deck to InsCard (one deck can have many cards)
+User(owner) to InsCard (each card, cohort, and deck has one user who owns it)
+User(owner) to StuCard
+User(owner) to Cohort
 User(owner) to Deck
 
 Many to many relationships:
-User to Class (one user can join many classes, one class can have many users)
-Class to Card
+User to Cohort (one user can join many cohorts, one cohort can have many users)
+Cohort to InsCard
 """
 
 # Third party imports
@@ -33,14 +34,14 @@ def load_user(user_id):
 # Association tables
 
 
-UserClasses = db.Table('UserClasses',
+UserCohorts = db.Table('UserCohorts',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('class_id', db.Integer, db.ForeignKey('class.id'))
+    db.Column('cohort_id', db.Integer, db.ForeignKey('cohort.id'))
 )
 
-CardClasses = db.Table('CardClasses',
-    db.Column('card_id', db.Integer, db.ForeignKey('card.id')),
-    db.Column('class_id', db.Integer, db.ForeignKey('class.id'))
+CardCohorts = db.Table('CardCohorts',
+    db.Column('ins_card_id', db.Integer, db.ForeignKey('inscard.id')),
+    db.Column('cohort_id', db.Integer, db.ForeignKey('cohort.id'))
 )
 
 # Class models
@@ -53,13 +54,14 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(30))
     email = db.Column(db.String(40), unique=True)
     password_hash = db.Column(db.String(128))
-    # A user can own multiple decks, cards, and classes (one to many)
+    # A user can own multiple decks, cards, and cohorts (one to many)
     decks = db.relationship('Deck', backref='owner')
-    cards = db.relationship('Card', backref='owner')
-    classes = db.relationship('Class', backref='owner')
-    # Many to many: users to classes
-    user_classes = db.relationship('Class',
-                                   secondary=UserClasses,
+    ins_cards = db.relationship('InsCard', backref='owner')
+    stu_cards = db.relationship('StuCard', backref='owner')
+    cohorts = db.relationship('Cohort', backref='owner')
+    # Many to many: users to cohorts
+    user_cohorts = db.relationship('Cohort',
+                                   secondary=UserCohorts,
                                    backref=db.backref('students'))
 
     def __init__(self, first_name, last_name, email, password_hash):
@@ -91,15 +93,15 @@ class Deck(db.Model):
     name = db.Column(db.String(30), unique=True)
     # Every deck is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # A deck can have multiple cards (one to many)
-    cards = db.relationship('Card', backref='deck')
+    # A deck can have multiple InsCards (one to many)
+    cards = db.relationship('InsCard', backref='deck')
 
     def __init__(self, name, owner):
         self.name = name
         self.owner = owner
 
     def list_cards(self, an_owner_id):
-        cards = Card.query.filter_by(owner_id=an_owner_id).all()
+        cards = InsCard.query.filter_by(owner_id=an_owner_id).all()
         return cards
 
     def __repr__(self):
@@ -110,18 +112,30 @@ class Deck(db.Model):
 
 
 class Card(db.Model):
-    """ Creates Card table """
+    """ Superclass for InsCard and StuCard """
     id = db.Column(db.Integer, primary_key=True)
     front = db.Column(db.String(1200))
     back = db.Column(db.String(1200))
-    # Every card belongs to one deck
-    deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'))
-    # Every card is owned by one user
+    # Every Card is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # Many to many: cards to classes
-    card_classes = db.relationship('Class',
-                                   secondary=CardClasses,
-                                   backref=db.backref('cards'))
+
+    owner_name = self.owner.first_name + " " + self.owner.last_name
+
+
+class InsCard(db.Model, Card):
+    """
+    Stands for "Instructor Card." Creates InsCard table.
+
+    Instructors create these cards, then assign them to a cohort. When an
+    InsCard is assigned to a cohort, a StuCard object is created for each
+    student in the cohort.
+    """
+    # Every InsCard belongs to one deck
+    deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'))
+    # Many to many: InsCards to Cohorts
+    card_cohorts = db.relationship('Cohort',
+                                   secondary=CardCohorts,
+                                   backref=db.backref('ins_cards'))
 
     def __init__(self, front, back, deck, owner):
         self.front = front
@@ -130,7 +144,6 @@ class Card(db.Model):
         self.owner = owner
 
     def __repr__(self):
-        owner_name = self.owner.first_name + " " + self.owner.last_name
         return '<ID: {}, Front: {}, Back: {}, Deck: {}>'.format(self.id,
                                                                 self.front,
                                                                 self.back,
@@ -138,21 +151,53 @@ class Card(db.Model):
                                                                 owner_name)
 
 
-class Class(db.Model):
-    """ Creates Class table """
+class StuCard(db.Model, Card):
+    """
+    Stands for "Student Card." Creates StuCard table.
+
+    Extends the Card class. Is basically a copy of the InsCard it is based on.
+    The difference is that it will have review data (e.g. date of last review)
+    tied to a specific user.
+    """
+    # 0=new, 1=learning, 2=reviewed, 3=due
+    review = db.Column(db.Integer)
+    # When this card is due
+    due = db.Column(db.Integer)
+    # One to many: every StuCard belongs to one Cohort
+    cohort_id = db.Column(db.Integer, db.ForeignKey('cohort.id'))
+
+    def __init__(self, front, back, cohort, owner):
+        self.front = front
+        self.back = back
+        self.cohort = cohort
+        self.owner = owner
+
+    def __repr__(self):
+        return '<ID: {}, F: {}, B: {}, C: {}, Due: {}>'.format(self.id,
+                                                               self.front,
+                                                               self.back,
+                                                               self.cohort,
+                                                               self.due,
+                                                               owner_name)
+
+
+class Cohort(db.Model):
+    """ Creates Cohort table """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True)
     password_hash = db.Column(db.String(128))
-    # Every class is owned by one user
+    # Every Cohort is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # Many to many: classes to cards
-    card_classes = db.relationship('Card',
-                                   secondary=CardClasses,
-                                   backref=db.backref('classes'))
-    # Many to many: classes to users
-    user_classes = db.relationship('User',
-                                   secondary=UserClasses,
-                                   backref=db.backref('joined_classes'))
+    # A Cohort can have multiple StuCards (one to many)
+    cards = db.relationship('StuCard', backref='cohort')
+    # Many to many: Cohorts to InsCards
+    card_cohorts = db.relationship('InsCard',
+                                   secondary=CardCohorts,
+                                   backref=db.backref('cohorts'))
+    # Many to many: Cohorts to Users
+    user_cohorts = db.relationship('User',
+                                   secondary=UserCohorts,
+                                   backref=db.backref('joined_cohorts'))
 
     def __init__(self, name, password_hash, owner):
         self.name = name
@@ -164,11 +209,3 @@ class Class(db.Model):
         return '<ID: {}, Name: {}, Owner: {}>'.format(self.id,
                                                       self.name,
                                                       owner_name)
-
-
-# class UserCard(db.Model, Card):
-#     """
-#     Extends the Card class. Is basically a copy of the card it is based on.
-#     The difference is that it is tied to a user. It will contain data on
-#     review times.
-#     """

@@ -46,7 +46,7 @@ class AddCardForm(FlaskForm):
     submit = SubmitField('Add card')
 
 
-class CreateClassForm(FlaskForm):
+class CreateCohortForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=35)])
     password = PasswordField('Password',
                              validators=[DataRequired(),
@@ -56,14 +56,14 @@ class CreateClassForm(FlaskForm):
     submit = SubmitField('Create')
 
 
-class JoinClassForm(FlaskForm):
+class JoinCohortForm(FlaskForm):
     email = StringField('Instructor email', validators=[DataRequired(),
                                                         Email(),
                                                         Length(max=35)])
     submit = SubmitField('Submit')
 
 
-class JoinClassPWForm(FlaskForm):
+class JoinCohortPWForm(FlaskForm):
     password = PasswordField('Password',
                              validators=[DataRequired(), Length(min=5, max=45)])
     submit = SubmitField('Submit')

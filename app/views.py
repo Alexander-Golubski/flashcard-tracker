@@ -8,8 +8,8 @@ from flask import Flask, redirect, render_template, session, flash, url_for, req
 from flask_login import login_required, login_user, logout_user, current_user
 # Local application imports
 from . import app, db
-from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, CreateClassForm, JoinClassForm, JoinClassPWForm
-from .models import User, Deck, Card, Class, load_user
+from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, CreateCohortForm, JoinCohortForm, JoinCohortPWForm
+from .models import User, Deck, InsCard, StuCard, Cohort, load_user
 
 
 # Authentication route controllers
@@ -31,7 +31,7 @@ def register():
         # add user to the database
         db.session.add(user)
         db.session.commit()
-        flash('Welcome to Flashcard Tracker! You may now login.')
+        flash('Welcome to teach_SR! You may now login.')
 
         return redirect(url_for('login'))
 
@@ -78,13 +78,14 @@ def dashboard():
     """
     Displays the dashboard view
     From the dashboard, user can access:
-    Review Flashcards, Decks, and Monitoring
+    Review Flashcards, Cohorts, Decks, and Monitoring
     """
     user = current_user
     decks = Deck.query.filter_by(owner_id=current_user.id).all()
-    classes = user.classes
+    cohorts = user.cohorts
 
-    return render_template('dashboard.html', decks=decks, user=user, classes=classes)
+    return render_template('dashboard.html', decks=decks, user=user,
+                           cohorts=cohorts)
 
 
 # Deck route controllers
@@ -122,24 +123,24 @@ def deck_view(deck_id):
     # Get currently selected deck
     deck = Deck.query.get_or_404(deck_id)
     # Display list of cards in deck using model's backref attribute
-    cards = deck.cards
-    # Get list of the user's owned classes for dropdown menu
-    classes = current_user.classes
+    cards = deck.ins_cards
+    # Get list of the user's owned cohorts for dropdown menu
+    cohorts = current_user.cohorts
 
-    # Route to assign cards to class
-    if request.method == 'POST' and request.form['submit'] == 'Add to class':
+    # Route to assign cards to cohort
+    if request.method == 'POST' and request.form['submit'] == 'Add to cohort':
         # Get checkbox'd cards
         sel_card_ids = request.form.getlist('sel_cards')
         # Create list of card objects
         sel_cards = []
         for card_id in sel_card_ids:
-            sel_cards.append(Card.query.get(card_id))
-        # Get selected class
-        sel_class_id = request.form.get('sel_class_id')
-        sel_class = Class.query.get(sel_class_id)
-        # Add cards to selected class
+            sel_cards.append(InsCard.query.get(card_id))
+        # Get selected cohort
+        sel_cohort_id = request.form.get('sel_cohort_id')
+        sel_cohort = Cohort.query.get(sel_cohort_id)
+        # Add cards to selected cohort
         for card in sel_cards:
-            card.classes.append(sel_class)
+            card.cohorts.append(sel_cohort)
         db.session.commit()
         flash('Card(s) successfully added')
 
@@ -153,7 +154,7 @@ def deck_view(deck_id):
         # Create list of card objects
         sel_cards = []
         for card_id in sel_card_ids:
-            sel_cards.append(Card.query.get(card_id))
+            sel_cards.append(InsCard.query.get(card_id))
         # Delete cards from deck
         for card in sel_cards:
             deck.cards.remove(card)
@@ -162,8 +163,8 @@ def deck_view(deck_id):
 
         return redirect('/deck/{}'.format(deck_id))
 
-    return render_template('deck.html', deck=deck, cards=cards, 
-                           classes=classes)
+    return render_template('deck.html', deck=deck, cards=cards,
+                           cohorts=cohorts)
 
 
 @app.route('/deck/add-card/<int:deck_id>', methods=['GET', 'POST'])
@@ -176,10 +177,10 @@ def add_card(deck_id):
     deck = Deck.query.filter_by(id=deck_id).first()
     if form.validate_on_submit():
         # create card
-        card = Card(front=form.front.data,
-                    back=form.back.data,
-                    deck=deck,
-                    owner=current_user)
+        card = InsCard(front=form.front.data,
+                       back=form.back.data,
+                       deck=deck,
+                       owner=current_user)
         # add card to the database
         db.session.add(card)
         db.session.commit()
@@ -190,135 +191,135 @@ def add_card(deck_id):
     return render_template('add-card.html', form=form)
 
 
-# Class route controllers
+# Cohort route controllers
 
 
-@app.route('/class/<int:class_id>', methods=['GET', 'POST'])
+@app.route('/cohort/<int:cohort_id>', methods=['GET', 'POST'])
 @login_required
-def class_view(class_id):
+def cohort_view(cohort_id):
     """
-    Displays view of class
+    Displays view of cohort
     """
 
-    sel_class = Class.query.get_or_404(class_id)
-    cards = sel_class.cards
-    students = sel_class.students
+    sel_cohort = Cohort.query.get_or_404(cohort_id)
+    cards = sel_cohort.ins_cards
+    students = sel_cohort.students
 
-    # TODO: allow these only for class owner
+    # TODO: allow these only for cohort owner
     if request.method == 'POST':
 
-        # Route to remove students from class
-        if request.form['submit'] == 'Remove student(s) from class':
+        # Route to remove students from cohort
+        if request.form['submit'] == 'Remove student(s) from cohort':
             # Get checkbox'd students
             sel_stu_ids = request.form.getlist('sel_students')
             # Create list of user objects
             sel_students = []
             for stu_id in sel_stu_ids:
                 sel_students.append(User.query.get(stu_id))
-            # Remove students from class
+            # Remove students from cohort
             for student in sel_students:
-                student.joined_classes.remove(sel_class)
+                student.joined_cohorts.remove(sel_cohort)
             db.session.commit()
             flash('Student(s) successfully removed')
 
-            return redirect('/class/{}'.format(class_id))
+            return redirect('/cohort/{}'.format(cohort_id))
 
-        # TODO: Add functionality to remove UserCards from students
+        # TODO: Add functionality to remove StuCards from students
         # TODO: give error if no card is checked
-        # Route to remove cards from class
-        if request.form['submit'] == 'Remove card(s) from class':
+        # Route to remove cards from cohort
+        if request.form['submit'] == 'Remove card(s) from cohort':
             # Get checkbox'd cards
             sel_card_ids = request.form.getlist('sel_cards')
             # Create list of card objects
             sel_cards = []
             for card_id in sel_card_ids:
-                sel_cards.append(Card.query.get(card_id))
+                sel_cards.append(InsCard.query.get(card_id))
             # Remove cards contained in list
             for card in sel_cards:
-                card.classes.remove(sel_class)
+                card.cohorts.remove(sel_cohort)
             db.session.commit()
             flash('Card(s) successfully removed.')
 
-            return redirect('/class/{}'.format(class_id))
+            return redirect('/cohort/{}'.format(cohort_id))
 
-    return render_template('class.html', sel_class=sel_class,
+    return render_template('cohort.html', sel_cohort=sel_cohort,
                            students=students, cards=cards)
 
 
-@app.route('/create-class', methods=['GET', 'POST'])
+@app.route('/create-cohort', methods=['GET', 'POST'])
 @login_required
-def create_class():
+def create_cohort():
     """
-    Allows user to create a class
+    Allows user to create a cohort
     """
-    form = CreateClassForm()
+    form = CreateCohortForm()
     if form.validate_on_submit():
-        # create class
-        cohort = Class(name=form.name.data,
-                       password_hash=form.password.data,
-                       owner=current_user)
-        # add class to the database
+        # create cohort
+        cohort = Cohort(name=form.name.data,
+                        password_hash=form.password.data,
+                        owner=current_user)
+        # add cohort to the database
         db.session.add(cohort)
         db.session.commit()
-        flash('Class successfully created')
+        flash('Cohort successfully created')
 
         return redirect(url_for('dashboard'))
 
-    return render_template('create-class.html', form=form)
+    return render_template('create-cohort.html', form=form)
 
 
-@app.route('/join-class', methods=['GET', 'POST'])
+@app.route('/join-cohort', methods=['GET', 'POST'])
 @login_required
-def join_class():
+def join_cohort():
     """
-    Allows user to join a class, including their own
+    Allows user to join a cohort, including their own
     """
-    form = JoinClassForm()
+    form = JoinCohortForm()
     if form.validate_on_submit():
         # Get instructor based on submitted email
         instructor = User.query.filter_by(email=form.email.data).first()
 
-        return redirect('join-class/{}'.format(instructor.id))
+        return redirect('join-cohort/{}'.format(instructor.id))
 
-    return render_template('join-class.html', form=form)
+    return render_template('join-cohort.html', form=form)
 
 
-@app.route('/join-class/<int:instructor_id>')
+@app.route('/join-cohort/<int:instructor_id>')
 @login_required
-def join_class_inst(instructor_id):
+def join_cohort_inst(instructor_id):
     """
-    Shows user a list of classes owned by instructor
+    Shows user a list of cohorts owned by instructor
     """
     instructor = User.query.filter_by(id=instructor_id).first()
-    classes = instructor.classes
+    cohorts = instructor.cohorts
 
-    return render_template('instructor-classes.html',
-                           classes=classes, instructor=instructor)
+    return render_template('instructor-cohorts.html',
+                           cohorts=cohorts, instructor=instructor)
 
 
-@app.route('/join-class-pw/<int:class_id>', methods=['GET', 'POST'])
+@app.route('/join-cohort-pw/<int:cohort_id>', methods=['GET', 'POST'])
 @login_required
-def join_class_pw(class_id):
+def join_cohort_pw(cohort_id):
     """
-    Prompts user to enter password before joining the class
+    Prompts user to enter password before joining the cohort
     """
-    form = JoinClassPWForm()
+    form = JoinCohortPWForm()
     if form.validate_on_submit():
-        # Get selected class based on id from URL
-        sel_class = Class.query.filter_by(id=class_id).first()
-        if sel_class.password_hash == form.password.data:
-            # Add user to the class through the backref "students"
-            sel_class.students.append(current_user)
+        # Get selected cohort based on id from URL
+        sel_cohort = Cohort.query.filter_by(id=cohort_id).first()
+        if sel_cohort.password_hash == form.password.data:
+            # Add user to the cohort through the backref "students"
+            sel_cohort.students.append(current_user)
             db.session.commit()
-            flash('You have joined the class!')
+            flash('You have joined the cohort!')
 
             return redirect('/dashboard')
         else:
             flash('Invalid password')
 
-            return render_template('join-class-pw.html', form=form)
+            return render_template('join-cohort-pw.html', form=form)
 
-    return render_template('join-class-pw.html', form=form)
+    return render_template('join-cohort-pw.html', form=form)
 
 
 # Redirects
@@ -331,16 +332,16 @@ def deck_dashboard():
     return redirect('/dashboard')
 
 
-@app.route('/class/dashboard')
+@app.route('/cohort/dashboard')
 @login_required
-def class_dashboard():
+def cohort_dashboard():
 
     return redirect('/dashboard')
 
 
-@app.route('/join-class/dashboard')
+@app.route('/join-cohort/dashboard')
 @login_required
-def join_class_dashboard():
+def join_cohort_dashboard():
 
     return redirect('/dashboard')
 
