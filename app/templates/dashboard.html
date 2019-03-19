@@ -7,18 +7,19 @@
 <hr>
 <p><a href='/create-cohort'>Create new cohort</a></p>
 <p><a href='/join-cohort'>Join cohort</a></p>
-{% for cohort in cohort %}
-<p><a href='/cohort/{{cohort.id}}'>{{cohort.name}}</a></p>
+<br>
+{% for cohort in cohorts %}
+    <p><a href='/cohort/{{cohort.id}}'>{{cohort.name}}</a></p>
 {% endfor %}
 <br>
 
 <h3>My Decks</h3>
 <hr>
-    {% for deck in decks %}
-    <p><a href='/deck/{{deck.id}}'>{{deck.name}}</a></p>
-    {% endfor %}
-<br>
     <p><a href='/create-deck'>Create new deck</a></p>
+    <br>
+    {% for deck in decks %}
+        <p><a href='/deck/{{deck.id}}'>{{deck.name}}</a></p>
+    {% endfor %}
 <br>
 
 <h3>Monitoring</h3>
