@@ -40,7 +40,7 @@ UserCohorts = db.Table('UserCohorts',
 )
 
 CardCohorts = db.Table('CardCohorts',
-    db.Column('ins_card_id', db.Integer, db.ForeignKey('inscard.id')),
+    db.Column('ins_card_id', db.Integer, db.ForeignKey('ins_card.id')),
     db.Column('cohort_id', db.Integer, db.ForeignKey('cohort.id'))
 )
 
@@ -94,7 +94,7 @@ class Deck(db.Model):
     # Every deck is owned by one user
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     # A deck can have multiple InsCards (one to many)
-    cards = db.relationship('InsCard', backref='deck')
+    ins_cards = db.relationship('InsCard', backref='deck')
 
     def __init__(self, name, owner):
         self.name = name
@@ -111,18 +111,7 @@ class Deck(db.Model):
                                                       owner_name)
 
 
-class Card(db.Model):
-    """ Superclass for InsCard and StuCard """
-    id = db.Column(db.Integer, primary_key=True)
-    front = db.Column(db.String(1200))
-    back = db.Column(db.String(1200))
-    # Every Card is owned by one user
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    owner_name = self.owner.first_name + " " + self.owner.last_name
-
-
-class InsCard(db.Model, Card):
+class InsCard(db.Model):
     """
     Stands for "Instructor Card." Creates InsCard table.
 
@@ -130,6 +119,11 @@ class InsCard(db.Model, Card):
     InsCard is assigned to a cohort, a StuCard object is created for each
     student in the cohort.
     """
+    id = db.Column(db.Integer, primary_key=True)
+    front = db.Column(db.String(1200))
+    back = db.Column(db.String(1200))
+    # Every InsCard is owned by one user
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     # Every InsCard belongs to one deck
     deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'))
     # Many to many: InsCards to Cohorts
@@ -144,6 +138,7 @@ class InsCard(db.Model, Card):
         self.owner = owner
 
     def __repr__(self):
+        owner_name = self.owner.first_name + " " + self.owner.last_name
         return '<ID: {}, Front: {}, Back: {}, Deck: {}>'.format(self.id,
                                                                 self.front,
                                                                 self.back,
@@ -151,7 +146,7 @@ class InsCard(db.Model, Card):
                                                                 owner_name)
 
 
-class StuCard(db.Model, Card):
+class StuCard(db.Model):
     """
     Stands for "Student Card." Creates StuCard table.
 
@@ -159,6 +154,11 @@ class StuCard(db.Model, Card):
     The difference is that it will have review data (e.g. date of last review)
     tied to a specific user.
     """
+    id = db.Column(db.Integer, primary_key=True)
+    front = db.Column(db.String(1200))
+    back = db.Column(db.String(1200))
+    # Every StuCard is owned by one user
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     # 0=new, 1=learning, 2=reviewed, 3=due
     review = db.Column(db.Integer)
     # When this card is due
@@ -173,6 +173,7 @@ class StuCard(db.Model, Card):
         self.owner = owner
 
     def __repr__(self):
+        owner_name = self.owner.first_name + " " + self.owner.last_name
         return '<ID: {}, F: {}, B: {}, C: {}, Due: {}>'.format(self.id,
                                                                self.front,
                                                                self.back,
