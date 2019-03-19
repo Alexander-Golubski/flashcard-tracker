@@ -145,6 +145,7 @@ def deck_view(deck_id):
 
         return redirect('/deck/{}'.format(deck_id))
 
+    # TODO: give error if no card is checked
     # Route to delete cards
     if request.method == 'POST' and request.form['submit'] == 'Delete cards':
         # Get checkbox'd cards
@@ -207,7 +208,7 @@ def class_view(class_id):
     if request.method == 'POST':
 
         # Route to remove students from class
-        if request.form['submit'] == 'Remove students from class':
+        if request.form['submit'] == 'Remove student(s) from class':
             # Get checkbox'd students
             sel_stu_ids = request.form.getlist('sel_students')
             # Create list of user objects
@@ -223,8 +224,9 @@ def class_view(class_id):
             return redirect('/class/{}'.format(class_id))
 
         # TODO: Add functionality to remove UserCards from students
+        # TODO: give error if no card is checked
         # Route to remove cards from class
-        if request.form['submit'] == 'Remove cards from class':
+        if request.form['submit'] == 'Remove card(s) from class':
             # Get checkbox'd cards
             sel_card_ids = request.form.getlist('sel_cards')
             # Create list of card objects
