@@ -122,7 +122,7 @@ def deck_view(deck_id):
 
     # Get currently selected deck
     deck = Deck.query.get_or_404(deck_id)
-    # Display list of cards in deck using model's backref attribute
+    # Display list of InsCards in deck using model's backref attribute
     cards = deck.ins_cards
     # Get list of the user's owned cohorts for dropdown menu
     cohorts = current_user.cohorts
