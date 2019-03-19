@@ -49,14 +49,17 @@ class AddCardForm(FlaskForm):
 class CreateClassForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=35)])
     password = PasswordField('Password',
-                             validators=[DataRequired(), Length(min=5, max=45)])
+                             validators=[DataRequired(),
+                                         Length(min=5, max=45),
+                                         EqualTo('confirm_password')])
+    confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('Create')
 
 
 class JoinClassForm(FlaskForm):
     email = StringField('Instructor email', validators=[DataRequired(),
-                                                       Email(),
-                                                       Length(max=35)])
+                                                        Email(),
+                                                        Length(max=35)])
     submit = SubmitField('Submit')
 
 
