@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Class{% endblock %}
+{% block title %}Cohort{% endblock %}
 
 {% block content %}
 
-    <h1>{{sel_class.name}}</h1>
+    <h1>{{sel_cohort.name}}</h1>
     <hr>
 
     <h3>Students</h3>
@@ -23,7 +23,7 @@
                 {% endfor %}
             </table>
             <br>
-            <input type="submit" name="submit" value="Remove student(s) from class">
+            <input type="submit" name="submit" value="Remove student(s) from cohort">
         </form>
 
     <h3>Cards</h3>
@@ -43,7 +43,7 @@
                 {% endfor %}
             </table>
             <br>
-            <input type="submit" name="submit" value="Remove card(s) from class">
+            <input type="submit" name="submit" value="Remove card(s) from cohort">
         </form>
 
 {% endblock %}

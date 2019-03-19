@@ -13,7 +13,7 @@
             <tr>
                 <th>Front</th>
                 <th>Back</th>
-                <th>Classes</th>
+                <th>Cohorts</th>
                 <th>Edit</th>
             </tr>
             {% for card in cards %}
@@ -21,8 +21,8 @@
                 <th>{{card.front}}</th>
                 <th>{{card.back}}</th>
                 <th>
-                {% for class in card.classes %}
-                {{class.name + " "}}
+                {% for cohort in card.cohorts %}
+                {{cohort.name + " "}}
                 {% endfor %}
                 </th>
                 <th><a href="edit-card?id={{card.id}}.html">Edit card</a></th>
@@ -31,12 +31,12 @@
             {% endfor %}
         </table>
         <br>
-        <select name="sel_class_id">
-            {% for class in classes %}
-            <option value="{{class.id}}">{{class.name}}</option>
+        <select name="sel_cohort_id">
+            {% for cohort in cohorts %}
+            <option value="{{cohort.id}}">{{cohort.name}}</option>
             {% endfor %}
         </select>
-        <input type="submit" name="submit" value="Add to class">
+        <input type="submit" name="submit" value="Add to cohort">
         <hr>
         <br>
         <input type="submit" name="submit" value="Delete cards">

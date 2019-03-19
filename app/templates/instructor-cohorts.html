@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Instructor Cohorts{% endblock %}
+
+{% block content %}
+
+<h1>{{instructor.name}}</h1>
+<hr>
+
+{% for cohort in cohorts %}
+    <p><a href="/join-cohort-pw/{{cohort.id}}">{{cohort.name}}</a></p>
+{% endfor %}
+
+{% endblock %}

@@ -5,10 +5,10 @@
 
 <h3>Review Flashcards</h3>
 <hr>
-<p><a href='/create-class'>Create new class</a></p>
-<p><a href='/join-class'>Join class</a></p>
-{% for class in classes %}
-<p><a href='/class/{{class.id}}'>{{class.name}}</a></p>
+<p><a href='/create-cohort'>Create new cohort</a></p>
+<p><a href='/join-cohort'>Join cohort</a></p>
+{% for cohort in cohort %}
+<p><a href='/cohort/{{cohort.id}}'>{{cohort.name}}</a></p>
 {% endfor %}
 <br>
 
