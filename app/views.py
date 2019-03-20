@@ -10,6 +10,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from . import app, db
 from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, CreateCohortForm, JoinCohortForm, JoinCohortPWForm
 from .models import User, Deck, InsCard, StuCard, Cohort, load_user
+from .utils import get_checkboxed
 
 
 # Authentication route controllers
@@ -83,9 +84,10 @@ def dashboard():
     user = current_user
     decks = Deck.query.filter_by(owner_id=current_user.id).all()
     cohorts = user.cohorts
+    joined_cohorts = user.joined_cohorts
 
     return render_template('dashboard.html', decks=decks, user=user,
-                           cohorts=cohorts)
+                           cohorts=cohorts, joined_cohorts=joined_cohorts)
 
 
 # Deck route controllers
@@ -129,18 +131,16 @@ def deck_view(deck_id):
 
     # Route to assign cards to cohort
     if request.method == 'POST' and request.form['submit'] == 'Add to cohort':
-        # Get checkbox'd cards
-        sel_card_ids = request.form.getlist('sel_cards')
-        # Create list of card objects
-        sel_cards = []
-        for card_id in sel_card_ids:
-            sel_cards.append(InsCard.query.get(card_id))
         # Get selected cohort
         sel_cohort_id = request.form.get('sel_cohort_id')
         sel_cohort = Cohort.query.get(sel_cohort_id)
-        # Add cards to selected cohort
-        for card in sel_cards:
+        # Add checkboxed cards to selected cohort
+        for card in get_checkboxed():
             card.cohorts.append(sel_cohort)
+            # Create a StuCard for each student in cohort
+            for student in sel_cohort.students:
+                stu_card = card.create_stu_card(sel_cohort.id, student.id)
+                db.session.add(stu_card)
         db.session.commit()
         flash('Card(s) successfully added')
 
@@ -149,14 +149,8 @@ def deck_view(deck_id):
     # TODO: give error if no card is checked
     # Route to delete cards
     if request.method == 'POST' and request.form['submit'] == 'Delete cards':
-        # Get checkbox'd cards
-        sel_card_ids = request.form.getlist('sel_cards')
-        # Create list of card objects
-        sel_cards = []
-        for card_id in sel_card_ids:
-            sel_cards.append(InsCard.query.get(card_id))
         # Delete cards from deck
-        for card in sel_cards:
+        for card in get_checkboxed():
             deck.cards.remove(card)
         db.session.commit()
         flash('Card(s) successfully deleted')
@@ -322,6 +316,9 @@ def join_cohort_pw(cohort_id):
     return render_template('join-cohort-pw.html', form=form)
 
 
+# Review route controllers
+
+
 @app.route('/review/<int:cohort_id>/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def review(cohort_id, user_id):
@@ -341,10 +338,11 @@ def free_review(cohort_id, user_id):
     Allows user to review all cards in cohort outside of the SR schedule
     """
     cohort = Cohort.query.get(cohort_id)
-    total_cards = total_cards(cohort)
+    total_cards = cohort.total_cards(cohort_id, user_id)
 
     return render_template('free-review-landing.html', cohort_id=cohort_id,
-                           user_id=user_id)
+                           cohort=cohort, user_id=user_id,
+                           total_cards=total_cards)
 
 
 # Redirects
