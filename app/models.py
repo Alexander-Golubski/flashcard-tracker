@@ -205,6 +205,9 @@ class Cohort(db.Model):
         self.password_hash = password_hash
         self.owner = owner
 
+    def total_cards(self):
+        
+
     def __repr__(self):
         owner_name = self.owner.first_name + " " + self.owner.last_name
         return '<ID: {}, Name: {}, Owner: {}>'.format(self.id,

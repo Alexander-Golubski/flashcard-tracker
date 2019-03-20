@@ -322,6 +322,31 @@ def join_cohort_pw(cohort_id):
     return render_template('join-cohort-pw.html', form=form)
 
 
+@app.route('/review/<int:cohort_id>/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def review(cohort_id, user_id):
+    """
+    Allows user to see a certain cohort's cards
+    From here the user can review due cards or free review
+    """
+
+    return render_template('cohort-stu-view.html', cohort_id=cohort_id,
+                           user_id=user_id)
+
+
+@app.route('/free-review/<int:cohort_id>/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def free_review(cohort_id, user_id):
+    """
+    Allows user to review all cards in cohort outside of the SR schedule
+    """
+    cohort = Cohort.query.get(cohort_id)
+    total_cards = total_cards(cohort)
+
+    return render_template('free-review-landing.html', cohort_id=cohort_id,
+                           user_id=user_id)
+
+
 # Redirects
 
 
