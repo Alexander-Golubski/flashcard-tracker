@@ -137,6 +137,10 @@ class InsCard(db.Model):
         self.deck = deck
         self.owner = owner
 
+    def create_stu_card(self, cohort_id, owner_id):
+        stu_card = StuCard(self.front, self.back, cohort_id, owner_id)
+        return stu_card
+
     def __repr__(self):
         owner_name = self.owner.first_name + " " + self.owner.last_name
         return '<ID: {}, Front: {}, Back: {}, Deck: {}>'.format(self.id,
@@ -166,11 +170,11 @@ class StuCard(db.Model):
     # One to many: every StuCard belongs to one Cohort
     cohort_id = db.Column(db.Integer, db.ForeignKey('cohort.id'))
 
-    def __init__(self, front, back, cohort, owner):
+    def __init__(self, front, back, cohort_id, owner_id):
         self.front = front
         self.back = back
-        self.cohort = cohort
-        self.owner = owner
+        self.cohort_id = cohort_id
+        self.owner_id = owner_id
 
     def __repr__(self):
         owner_name = self.owner.first_name + " " + self.owner.last_name
@@ -205,8 +209,14 @@ class Cohort(db.Model):
         self.password_hash = password_hash
         self.owner = owner
 
-    def total_cards(self):
-        
+    def total_cards(self, cohort_id, student_id):
+        """
+        return number (int) of total cards in a cohort for a specific
+        student
+        """
+        total_cards = StuCard.query.filter_by(cohort_id=cohort_id,
+                                              owner_id=student_id).all()
+        return len(total_cards)
 
     def __repr__(self):
         owner_name = self.owner.first_name + " " + self.owner.last_name
