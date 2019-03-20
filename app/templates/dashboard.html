@@ -5,7 +5,7 @@
 
     <h3>Review Flashcards</h3>
         <hr>
-        {% for cohort in cohorts %}
+        {% for cohort in joined_cohorts %}
             <p><a href='/review/{{cohort.id}}/{{user.id}}'>Review {{cohort.name}}</a></p>
         {% endfor %}
         
