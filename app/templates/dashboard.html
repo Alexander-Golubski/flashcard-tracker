@@ -1,28 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>My Dashboard</h1>
+    <h1>My Dashboard</h1>
 
-<h3>Review Flashcards</h3>
-<hr>
-<p><a href='/create-cohort'>Create new cohort</a></p>
-<p><a href='/join-cohort'>Join cohort</a></p>
-<br>
-{% for cohort in cohorts %}
-    <p><a href='/cohort/{{cohort.id}}'>{{cohort.name}}</a></p>
-{% endfor %}
-<br>
+    <h3>Review Flashcards</h3>
+        <hr>
+        {% for cohort in cohorts %}
+            <p><a href='/review/{{cohort.id}}/{{user.id}}'>Review {{cohort.name}}</a></p>
+        {% endfor %}
+        
+        <br>
 
-<h3>My Decks</h3>
-<hr>
-    <p><a href='/create-deck'>Create new deck</a></p>
-    <br>
-    {% for deck in decks %}
-        <p><a href='/deck/{{deck.id}}'>{{deck.name}}</a></p>
-    {% endfor %}
-<br>
+    <h3>Cohort Management</h3>
+        <hr>
+        <p><a href='/create-cohort'>Create new cohort</a></p>
+        <p><a href='/join-cohort'>Join cohort</a></p>
+        <br>
 
-<h3>Monitoring</h3>
-<hr>
-<br>
+        {% for cohort in cohorts %}
+            <p><a href='/cohort/{{cohort.id}}'>Manage {{cohort.name}}</a></p>
+        {% endfor %}
+
+        <br>
+
+    <h3>My Decks</h3>
+        <hr>
+        <p><a href='/create-deck'>Create new deck</a></p>
+        <br>
+        {% for deck in decks %}
+            <p><a href='/deck/{{deck.id}}'>{{deck.name}}</a></p>
+        {% endfor %}
+        <br>
+
+    <h3>Monitoring</h3>
+        <hr>
+        <br>
 {% endblock %}

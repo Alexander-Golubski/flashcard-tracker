@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Free Review{% endblock %}
+
+{% block content %}
+
+    There are {{total_cards}} total cards to review in this cohort.
+
+    <a href="/free-review/{{cohort_id}}/{{stu_card_id}}">Begin</a>
+
+{% endblock %}

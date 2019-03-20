@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Review Landing{% endblock %}
+
+{% block content %}
+
+    <p>There are [] cards due today.</p>
+    <p><a href="/sr-review/{{cohort_id}}/{{user_id}}">Review Due Cards</a></p>
+    <br>
+    <a href="/free-review/{{cohort_id}}/{{user_id}}">Free Review</a>
+
+{% endblock %}
