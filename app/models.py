@@ -209,14 +209,25 @@ class Cohort(db.Model):
         self.password_hash = password_hash
         self.owner = owner
 
-    def total_cards(self, cohort_id, student_id):
+    def total_cards(self, student_id):
         """
         return number (int) of total cards in a cohort for a specific
         student
         """
-        total_cards = StuCard.query.filter_by(cohort_id=cohort_id,
-                                              owner_id=student_id).all()
-        return len(total_cards)
+        qo_card_list = StuCard.query.filter_by(id=self.id,
+                                               owner_id=student_id).all()
+        return len(qo_card_list)
+
+    def list_cards(self, student_id):
+        """
+        Returns a list of StuCard objects in a cohort for a specific student
+        """
+        qo_card_list = StuCard.query.filter_by(id=self.id,
+                                               owner_id=student_id).all()
+        card_list = []
+        for card in qo_card_list:
+            card_list.append(StuCard.query.filter_by(id=card.id))
+        return card_list
 
     def __repr__(self):
         owner_name = self.owner.first_name + " " + self.owner.last_name
