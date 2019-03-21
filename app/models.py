@@ -214,19 +214,17 @@ class Cohort(db.Model):
         return number (int) of total cards in a cohort for a specific
         student
         """
-        qo_card_list = StuCard.query.filter_by(id=self.id,
-                                               owner_id=student_id).all()
+        qo_card_list = StuCard.query.filter_by(cohort_id=self.id).filter_by(owner_id=student_id).all()
         return len(qo_card_list)
 
     def list_cards(self, student_id):
         """
         Returns a list of StuCard objects in a cohort for a specific student
         """
-        qo_card_list = StuCard.query.filter_by(id=self.id,
-                                               owner_id=student_id).all()
+        qo_card_list = StuCard.query.filter_by(cohort_id=self.id).filter_by(owner_id=student_id).all()
         card_list = []
         for card in qo_card_list:
-            card_list.append(StuCard.query.filter_by(id=card.id))
+            card_list.append(StuCard.query.get(card.id))
         return card_list
 
     def __repr__(self):
