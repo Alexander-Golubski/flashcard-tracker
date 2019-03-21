@@ -4,13 +4,14 @@ Contains all views, including:
 """
 
 # Third party imports
-from flask import Flask, redirect, render_template, session, flash, url_for, request
+from flask import redirect, render_template, flash, url_for, request
 from flask_login import login_required, login_user, logout_user, current_user
+import random
 # Local application imports
 from . import app, db
 from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, CreateCohortForm, JoinCohortForm, JoinCohortPWForm
 from .models import User, Deck, InsCard, StuCard, Cohort, load_user
-from .utils import get_checkboxed
+from .utils import get_checkboxed, set_learning, still_learning
 
 
 # Authentication route controllers
@@ -331,18 +332,63 @@ def review(cohort_id, user_id):
                            user_id=user_id)
 
 
-@app.route('/free-review/<int:cohort_id>/<int:user_id>', methods=['GET', 'POST'])
+@app.route('/free-review-landing/<int:cohort_id>/<int:user_id>',
+           methods=['GET', 'POST'])
 @login_required
-def free_review(cohort_id, user_id):
+def free_review_landing(cohort_id, user_id):
     """
-    Allows user to review all cards in cohort outside of the SR schedule
+    Shows user free review landing
     """
     cohort = Cohort.query.get(cohort_id)
-    total_cards = cohort.total_cards(cohort_id, user_id)
+    total_cards = cohort.total_cards(user_id)
+    # Start with a card selected randomly from the cohort
+    # TODO: change this to from list of due cards for SR
+    start_card_id = random.randrange(1, cohort.total_cards(user_id))
 
     return render_template('free-review-landing.html', cohort_id=cohort_id,
                            cohort=cohort, user_id=user_id,
-                           total_cards=total_cards)
+                           total_cards=total_cards,
+                           start_card_id=start_card_id)
+
+
+@app.route('/free-review/<int:cohort_id>/<int:user_id>/<int:card_id>',
+           methods=['GET', 'POST'])
+@login_required
+def free_review(cohort_id, user_id, card_id):
+    """
+    Allows user to review all cards in cohort outside of SR schedule
+    """
+    front = True
+    card = StuCard.query.get_or_404(card_id)
+    cohort = Cohort.query.get(cohort_id)
+    card_list = cohort.list_cards(user_id)
+    # Set StuCards' review field in cohort to 1 (learning)
+    set_learning(card_list)
+    # While loop to create list of cards in random order (while there are cards left)
+    # Its mostly random: we don't want the same card to be reviewed twice in a row
+    while still_learning(card_list):
+        random.shuffle(card_list)
+        first_card = card_list[0]
+        card_list.append(first_card)
+        card_list.remove(card_list[0])
+        card = card_list[0]
+        front = True
+        return render_template('review.html', card=card, front=front, card_list=card_list)
+        if request.method == 'POST' and request.form['submit'] == "Show back":
+            front = False
+            return render_template('review.html', card=card, front=front, card_list=card_list)
+            # When a card review is marked as correct, set to 2 (reviewed)
+            if request.method == 'POST' and request.form['submit'] == "Correct":
+                card.review == 2
+                front = True
+                return render_template('review.html', card=card, front=front, card_list=card_list)
+            # When a card review is marked as incorrect, just move to the next card
+            if request.method == 'POST' and request.form['submit'] == "Incorrect":
+                front = True
+                return render_template('review.html', card=card, front=front, card_list=card_list)
+    
+    return render_template('review.html', card=card, front=front, card_list=card_list)
+
 
 
 # Redirects
