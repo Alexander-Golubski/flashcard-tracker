@@ -3,9 +3,11 @@
 
 {% block content %}
 
+    <h3>Cohort: Student View</h3>
+
     <p>There are [] cards due today.</p>
-    <p><a href="/sr-review/{{cohort_id}}/{{user_id}}">Review Due Cards</a></p>
+    <p><a href="/sr-review-landing/{{cohort_id}}/{{user_id}}">Review Due Cards</a></p>
     <br>
-    <a href="/free-review/{{cohort_id}}/{{user_id}}">Free Review</a>
+    <a href="/free-review-landing/{{cohort_id}}/{{user_id}}">Free Review</a>
 
 {% endblock %}
