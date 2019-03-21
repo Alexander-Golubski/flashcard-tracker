@@ -3,10 +3,12 @@
 
 {% block content %}
 
+    <h3>Free Review Landing</h3>
+
     <br>
 
     There are {{total_cards}} total cards to review in {{cohort.name}}.
 
-    <p><a href="/free-review/{{cohort_id}}/{{stu_card_id}}">Begin</a></p>
+    <p><a href="/free-review/{{cohort_id}}/{{user_id}}/{{start_card_id}}">Begin</a></p>
 
 {% endblock %}
