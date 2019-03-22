@@ -6,12 +6,11 @@ Contains all views, including:
 # Third party imports
 from flask import redirect, render_template, flash, url_for, request
 from flask_login import login_required, login_user, logout_user, current_user
-import random
 # Local application imports
 from . import app, db
 from .forms import LoginForm, RegistrationForm, CreateDeckForm, AddCardForm, CreateCohortForm, JoinCohortForm, JoinCohortPWForm
 from .models import User, Deck, InsCard, StuCard, Cohort, load_user
-from .utils import get_checkboxed, set_learning, still_learning
+from .utils import get_checkboxed, set_learning, shuffle_cards, random_card
 
 
 # Authentication route controllers
@@ -343,12 +342,16 @@ def free_review_landing(cohort_id, user_id):
     total_cards = cohort.total_cards(user_id)
     # Start with a card selected randomly from the cohort
     # TODO: change this to from list of due cards for SR
-    start_card_id = random.randrange(1, cohort.total_cards(user_id))
+    card_list = cohort.list_cards(user_id)
+    start_card_id = random_card(card_list, cohort, user_id)
+    # Set StuCards' review field in cohort to 1 (learning)
+    set_learning(card_list)
+    db.session.commit()
 
     return render_template('free-review-landing.html', cohort_id=cohort_id,
                            cohort=cohort, user_id=user_id,
                            total_cards=total_cards,
-                           start_card_id=start_card_id)
+                           start_card_id=start_card_id, card_list=card_list)
 
 
 @app.route('/free-review/<int:cohort_id>/<int:user_id>/<int:card_id>',
@@ -362,33 +365,37 @@ def free_review(cohort_id, user_id, card_id):
     card = StuCard.query.get_or_404(card_id)
     cohort = Cohort.query.get(cohort_id)
     card_list = cohort.list_cards(user_id)
-    # Set StuCards' review field in cohort to 1 (learning)
-    set_learning(card_list)
-    # While loop to create list of cards in random order (while there are cards left)
-    # Its mostly random: we don't want the same card to be reviewed twice in a row
-    while still_learning(card_list):
-        random.shuffle(card_list)
-        first_card = card_list[0]
-        card_list.append(first_card)
-        card_list.remove(card_list[0])
-        card = card_list[0]
-        front = True
-        return render_template('review.html', card=card, front=front, card_list=card_list)
-        if request.method == 'POST' and request.form['submit'] == "Show back":
-            front = False
-            return render_template('review.html', card=card, front=front, card_list=card_list)
-            # When a card review is marked as correct, set to 2 (reviewed)
-            if request.method == 'POST' and request.form['submit'] == "Correct":
-                card.review == 2
-                front = True
-                return render_template('review.html', card=card, front=front, card_list=card_list)
-            # When a card review is marked as incorrect, just move to the next card
-            if request.method == 'POST' and request.form['submit'] == "Incorrect":
-                front = True
-                return render_template('review.html', card=card, front=front, card_list=card_list)
-    
-    return render_template('review.html', card=card, front=front, card_list=card_list)
+    learning_card_list = cohort.list_learning_cards(card_list)
+    # Show the back of the card when user presses button
+    if request.method == 'POST' and request.form['submit'] == "Show back":
+        front = False
+        return render_template('review.html', card=card, front=front,
+                               card_list=card_list,
+                               learning_card_list=learning_card_list)
+    # When a card review is marked as correct, set to 2 (reviewed)
+    if request.method == 'POST' and request.form['submit'] == "Correct":
+        card.review = 2
+        db.session.commit()
+        learning_card_list = cohort.list_learning_cards(card_list)
+        if len(learning_card_list) > 0:
+            card = shuffle_cards(learning_card_list)
+            return redirect('/free-review/{}/{}/{}'.format(cohort_id,
+                                                           user_id,
+                                                           card.id))
+        else:
+            return render_template('reviews-complete.html',
+                                   cohort_id=cohort_id, user_id=user_id)
+    # When a card review is marked as incorrect, just move to the next card
+    if request.method == 'POST' and request.form['submit'] == "Incorrect":
+        learning_card_list = cohort.list_learning_cards(card_list)
+        card = shuffle_cards(learning_card_list)
+        return redirect('/free-review/{}/{}/{}'.format(cohort_id,
+                                                       user_id,
+                                                       card.id))
 
+    return render_template('review.html', card=card, front=front,
+                           card_list=card_list,
+                           learning_card_list=learning_card_list)
 
 
 # Redirects
