@@ -178,12 +178,13 @@ class StuCard(db.Model):
 
     def __repr__(self):
         owner_name = self.owner.first_name + " " + self.owner.last_name
-        return '<ID: {}, F: {}, B: {}, C: {}, Due: {}>'.format(self.id,
-                                                               self.front,
-                                                               self.back,
-                                                               self.cohort,
-                                                               self.due,
-                                                               owner_name)
+        return '<ID: {}, F: {}, B: {}, C: {}, Due: {}, O: {} R: {}>'.format(self.id,
+                                                                            self.front,
+                                                                            self.back,
+                                                                            self.cohort,
+                                                                            self.due,
+                                                                            owner_name,
+                                                                            self.review)
 
 
 class Cohort(db.Model):
@@ -222,6 +223,20 @@ class Cohort(db.Model):
         Returns a list of StuCard objects in a cohort for a specific student
         """
         qo_card_list = StuCard.query.filter_by(cohort_id=self.id).filter_by(owner_id=student_id).all()
+        card_list = []
+        for card in qo_card_list:
+            card_list.append(StuCard.query.get(card.id))
+        return card_list
+
+    def list_learning_cards(self, listed_cards):
+        """
+        Returns a list of StuCard objects in a cohort for a specific student
+        """
+        learning = 1
+        qo_card_list = []
+        for card in listed_cards:
+            if card.review == learning:
+                qo_card_list.append(card)
         card_list = []
         for card in qo_card_list:
             card_list.append(StuCard.query.get(card.id))
